@@ -1,0 +1,119 @@
+<ui version="4.0" >
+ <class>ManageProfilesDialog</class>
+ <widget class="QWidget" name="ManageProfilesDialog" >
+  <property name="geometry" >
+   <rect>
+    <x>0</x>
+    <y>0</y>
+    <width>645</width>
+    <height>315</height>
+   </rect>
+  </property>
+  <layout class="QGridLayout" >
+   <property name="leftMargin" >
+    <number>0</number>
+   </property>
+   <property name="topMargin" >
+    <number>0</number>
+   </property>
+   <property name="rightMargin" >
+    <number>0</number>
+   </property>
+   <property name="bottomMargin" >
+    <number>0</number>
+   </property>
+   <item row="0" column="1" >
+    <widget class="QPushButton" name="newSessionButton" >
+     <property name="toolTip" >
+      <string>Create a new profile based upon the selected profile</string>
+     </property>
+     <property name="text" >
+      <string>New Profile...</string>
+     </property>
+    </widget>
+   </item>
+   <item row="1" column="1" >
+    <widget class="QPushButton" name="editSessionButton" >
+     <property name="enabled" >
+      <bool>false</bool>
+     </property>
+     <property name="toolTip" >
+      <string>Edit the selected profile</string>
+     </property>
+     <property name="text" >
+      <string>Edit Profile...</string>
+     </property>
+    </widget>
+   </item>
+   <item row="2" column="1" >
+    <widget class="QPushButton" name="deleteSessionButton" >
+     <property name="enabled" >
+      <bool>false</bool>
+     </property>
+     <property name="toolTip" >
+      <string>Delete the selected profile</string>
+     </property>
+     <property name="text" >
+      <string>Delete Profile</string>
+     </property>
+    </widget>
+   </item>
+   <item row="3" column="1" >
+    <widget class="QPushButton" name="setAsDefaultButton" >
+     <property name="enabled" >
+      <bool>false</bool>
+     </property>
+     <property name="toolTip" >
+      <string>Set the selected profile as the default for new terminal sessions</string>
+     </property>
+     <property name="text" >
+      <string>Set as Default</string>
+     </property>
+    </widget>
+   </item>
+   <item row="4" column="1" >
+    <spacer>
+     <property name="orientation" >
+      <enum>Qt::Vertical</enum>
+     </property>
+     <property name="sizeHint" >
+      <size>
+       <width>20</width>
+       <height>40</height>
+      </size>
+     </property>
+    </spacer>
+   </item>
+   <item rowspan="5" row="0" column="0" >
+    <widget class="QTableView" name="sessionTable" >
+     <property name="whatsThis" >
+      <string/>
+     </property>
+     <property name="frameShadow" >
+      <enum>QFrame::Plain</enum>
+     </property>
+     <property name="alternatingRowColors" >
+      <bool>true</bool>
+     </property>
+     <property name="selectionMode" >
+      <enum>QAbstractItemView::SingleSelection</enum>
+     </property>
+     <property name="selectionBehavior" >
+      <enum>QAbstractItemView::SelectRows</enum>
+     </property>
+     <property name="verticalScrollMode" >
+      <enum>QAbstractItemView::ScrollPerPixel</enum>
+     </property>
+     <property name="horizontalScrollMode" >
+      <enum>QAbstractItemView::ScrollPerPixel</enum>
+     </property>
+     <property name="showGrid" >
+      <bool>false</bool>
+     </property>
+    </widget>
+   </item>
+  </layout>
+ </widget>
+ <resources/>
+ <connections/>
+</ui>
