@@ -113,9 +113,10 @@ void ScreenWindow::getFilteredImage(Character* buffer,int size,int startLine,int
 	// find first line to copy
 	int startFrom = 0;
 	int visibleLineCount = 0;
+	int cursorLine = _screen->getHistLines() + _screen->getCursorY();
 	for (int i=0;i<endLine;i++)
 	{
-		if (_filterData.filteredLines[i])
+		if (_filterData.filteredLines[i] || i == cursorLine)
 			visibleLineCount++;
 
 		if (visibleLineCount >= startLine)
@@ -124,18 +125,14 @@ void ScreenWindow::getFilteredImage(Character* buffer,int size,int startLine,int
 		startFrom++;
 	}
 
-//	qDebug() << "Copying from line" << startFrom;
-
 	Q_ASSERT( startFrom >= startLine );
 
 	// copy visible lines
 	int count = 0;
 	for (int i=startFrom ; count < (endLine-startLine+1) && i < lineCount() ; i++)
 	{
-		if (_filterData.filteredLines[i])
+		if (_filterData.filteredLines[i] || i == cursorLine)
 		{
-//			qDebug() << "Copying line" << i;
-
 			_screen->getImage(_windowBuffer + (windowColumns()*count), windowColumns() ,i,i);
 			visibleLineCount++;
 			count++;
