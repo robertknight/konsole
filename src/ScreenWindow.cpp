@@ -201,7 +201,7 @@ Character* ScreenWindow::getImage()
 	 if (!_bufferNeedsUpdate)
 		return _windowBuffer;
  
-	_screen->getImage(_windowBuffer,size,
+	getFilteredImage(_windowBuffer,size,
 					  currentLine(),endWindowLine());
 
 	// this window may look beyond the end of the screen, in which 
