@@ -99,6 +99,8 @@ void ScreenWindow::setFold(int startLine,int endLine,bool fold)
 	_filterData.foldStarts.setBit(startLine,fold);
 	_filterData.foldEnds.setBit(endLine,fold);
 	_filterData.expanded.setBit(startLine,false);
+
+	_filterData.enabled = true;
 }
 void ScreenWindow::removeAllFolds()
 {
@@ -106,6 +108,8 @@ void ScreenWindow::removeAllFolds()
 	_filterData.foldEnds.fill(false);
 	_filterData.filteredLines.fill(true);
 	_filterData.expanded.fill(false);
+
+	_filterData.enabled = false;
 }
 void ScreenWindow::updateFilter()
 {
@@ -218,9 +222,18 @@ Character* ScreenWindow::getImage()
 
 	 if (!_bufferNeedsUpdate)
 		return _windowBuffer;
- 
-	getFilteredImage(_windowBuffer,size,
-					  currentLine(),endWindowLine());
+
+	// iterate through lines and copy visible ones if filters are enabled,
+	// otherwise fill the whole window buffer from the screen in one call
+	if (_filterData.enabled)
+	{
+		getFilteredImage(_windowBuffer,size,
+						  currentLine(),endWindowLine());
+	}
+	else
+	{
+		_screen->getImage(_windowBuffer,size,currentLine(),endWindowLine());
+	}
 
 	// this window may look beyond the end of the screen, in which 
 	// case there will be an unused area which needs to be filled
@@ -326,7 +339,10 @@ int ScreenWindow::windowColumns() const
 }
 int ScreenWindow::visibleLineCount() const
 {
-	return _filterData.visibleLines;
+	if (_filterData.enabled)
+		return _filterData.visibleLines;
+	else
+		return lineCount();
 }
 int ScreenWindow::lineCount() const
 {
