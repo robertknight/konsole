@@ -221,6 +221,8 @@ public:
 	bool isFoldOpen(int line) const;
 	void setFoldOpen(int line,bool open);
 	void removeAllFolds();
+	
+	void createFilterFolds(const QString& filter);
 
 public slots:
     /** 

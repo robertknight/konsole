@@ -26,6 +26,7 @@
 
 // Konsole
 #include "Screen.h"
+#include "TerminalCharacterDecoder.h"
 
 using namespace Konsole;
 
@@ -430,6 +431,45 @@ void ScreenWindow::notifyOutputChanged()
 	_bufferNeedsUpdate = true;
 
     emit outputChanged(); 
+}
+void ScreenWindow::createFilterFolds(const QString& filter)
+{
+	removeAllFolds();
+
+	if (filter.isEmpty())
+		return;
+
+	const int count = lineCount();
+	const int lastLine = count - 1;
+	const int firstLine = 0;
+	const int columns = windowColumns();
+
+	Character buffer[columns];
+	QString lineText(columns,' ');
+	int foldStart = -1;
+
+	for (int i=0;i<count;i++)
+	{
+		_screen->getImage(buffer,windowColumns(),i,i);
+	
+		for (int j=0 ; j < columns ; j++)
+			lineText[i] = buffer[j].character;
+
+		bool match = lineText.contains(filter);
+
+		if (match)
+			qDebug() << "Match for line: '" << lineText.simplified() << "'";
+		
+		if (match || i == firstLine || i == lastLine)
+		{
+			// create the fold for the previous match
+			if (i != firstLine)
+				setFold(foldStart,i-1,true);
+
+			// set the start for the next fold to the current line
+			foldStart = i;
+		}
+	}
 }
 
 #include "ScreenWindow.moc"
