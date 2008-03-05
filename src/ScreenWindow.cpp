@@ -61,6 +61,9 @@ Screen* ScreenWindow::screen() const
 
 ScreenWindow::FoldType ScreenWindow::foldType(int line) const
 {
+	if (!_filterData.enabled)
+		return FoldNone;
+
 	const int screenLine = line;
 	
 	if (_filterData.foldStarts.testBit(screenLine))
