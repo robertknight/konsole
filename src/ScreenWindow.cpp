@@ -102,6 +102,7 @@ void ScreenWindow::updateFilter()
 {
 	int count = lineCount();
 
+	// mark all lines as visible
 	_filterData.filteredLines.fill(true,count);
 
 	// stores status of folds covering current line
@@ -126,6 +127,9 @@ void ScreenWindow::updateFilter()
 
 		_filterData.filteredLines[i] = !stackHasClosedFold; 
 	}
+
+	// check that count of start/end folds are the same
+	Q_ASSERT(foldStack.isEmpty());
 }
 
 void ScreenWindow::getFilteredImage(Character* buffer,int size,int startLine,int endLine)
