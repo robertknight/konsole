@@ -591,9 +591,9 @@ void Screen::getImage( Character* dest, int size, int startLine, int endLine ) c
   }
 
   // mark the character at the current cursor position
-  int cursorIndex = loc(cuX, cuY + linesInHistoryBuffer);
-  if(getMode(MODE_Cursor) && cursorIndex < columns*mergedLines)
-    dest[cursorIndex].rendition |= RE_CURSOR;
+	int cursorLine = (hist->getLines() + cuY) - startLine;
+	if (getMode(MODE_Cursor) && cursorLine >= 0 && cursorLine < mergedLines) 
+		dest[loc(cuX,cursorLine)].rendition |= RE_CURSOR;
 }
 
 QVector<LineProperty> Screen::getLineProperties( int startLine , int endLine ) const
