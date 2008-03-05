@@ -210,8 +210,14 @@ public:
      */
     QString selectedText( bool preserveLineBreaks ) const;
 
-	void setFold(int line,bool fold);
-	bool isFold(int line) const;
+	void setFold(int startLine,int endLine,bool fold);
+	enum FoldType
+	{
+		FoldNone,
+		FoldStart,
+		FoldEnd
+	};
+	FoldType foldType(int line) const;
 	bool isFoldOpen(int line) const;
 	void setFoldOpen(int line,bool open);
 
@@ -249,7 +255,6 @@ private:
 
 	void updateFilter();
 	void getFilteredImage(Character* buffer,int size,int startLine,int endLine);
-	bool showLine(int line) const;
 
     Screen* _screen; // see setScreen() , screen()
 	Character* _windowBuffer;
@@ -264,7 +269,8 @@ private:
 
 	struct FilterData
 	{
-		QBitArray folds;
+		QBitArray foldStarts;
+		QBitArray foldEnds;
 		QBitArray expanded;
 		QBitArray filteredLines;
 	};

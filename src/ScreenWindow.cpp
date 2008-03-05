@@ -22,6 +22,7 @@
 
 // Qt
 #include <KDebug>
+#include <QStack>
 
 // Konsole
 #include "Screen.h"
@@ -55,39 +56,37 @@ Screen* ScreenWindow::screen() const
     return _screen;
 }
 
-bool ScreenWindow::isFold(int line) const
+ScreenWindow::FoldType ScreenWindow::foldType(int line) const
 {
-	return _filterData.folds.testBit(mapToScreen(line));
+	const int screenLine = mapToScreen(line);
+	
+	if (_filterData.foldStarts.testBit(screenLine))
+		return FoldStart;
+	else if (_filterData.foldEnds.testBit(screenLine))
+		return FoldEnd;
+	else
+		return FoldNone;
 }
 bool ScreenWindow::isFoldOpen(int line) const
 {
-	Q_ASSERT(isFold(mapToScreen(line)));
+	Q_ASSERT(foldType(mapToScreen(line)) == FoldStart);
 
 	return _filterData.expanded.testBit(mapToScreen(line));
 }
 void ScreenWindow::setFoldOpen(int line,bool open)
 {
-	Q_ASSERT(isFold(mapToScreen(line)));
+	Q_ASSERT(foldType(mapToScreen(line)) == FoldStart);
 
 	_filterData.expanded.setBit(mapToScreen(line),open);
 }
-void ScreenWindow::setFold(int line,bool fold)
+void ScreenWindow::setFold(int startLine,int endLine,bool fold)
 {
-	const int screenLine = mapToScreen(line);
+	const int screenLine = mapToScreen(startLine);
+	const int screenEndLine = mapToScreen(endLine);
 
-	_filterData.folds.setBit(screenLine,fold);
+	_filterData.foldStarts.setBit(screenLine,fold);
+	_filterData.foldEnds.setBit(screenEndLine,fold);
 	_filterData.expanded.setBit(screenLine,false);
-}
-
-bool ScreenWindow::showLine(int line) const
-{
-	Q_ASSERT( line >= 0 && line < lineCount() );
-	
-	for (int i = line;i >= 0;i--)
-		if (_filterData.folds.testBit(i))
-			return _filterData.expanded.testBit(i);
-
-	return true;
 }
 
 void ScreenWindow::updateFilter()
@@ -96,9 +95,27 @@ void ScreenWindow::updateFilter()
 
 	_filterData.filteredLines.fill(true,count);
 
+	// stores status of folds covering current line
+	// contains 'true' for open folds, 'false' for closed folds
+	QStack<bool> foldStack;
+
+	bool stackHasClosedFold = false;
+
 	for (int i=0;i<count;i++)
 	{
-		_filterData.filteredLines[i] = showLine(i);	
+		if (_filterData.foldStarts.testBit(i))
+		{
+			bool open = _filterData.expanded.testBit(i);
+			foldStack.push(open);
+			if (!open)
+				stackHasClosedFold = true;
+		} else if (_filterData.foldEnds.testBit(i))
+		{
+			foldStack.pop();
+			stackHasClosedFold = foldStack.contains(false);
+		}
+
+		_filterData.filteredLines[i] = !stackHasClosedFold; 
 	}
 }
 
