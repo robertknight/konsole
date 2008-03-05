@@ -93,6 +93,8 @@ void ScreenWindow::setFold(int startLine,int endLine,bool fold)
 	Q_ASSERT(_filterData.foldStarts.testBit(screenLine) ==
 			 _filterData.foldEnds.testBit(screenEndLine));	
 
+	qDebug() << (fold ? "Creating fold" : "Removing fold") << "from line" << startLine << "to" << endLine; 
+
 	_filterData.foldStarts.setBit(screenLine,fold);
 	_filterData.foldEnds.setBit(screenEndLine,fold);
 	_filterData.expanded.setBit(screenLine,false);
