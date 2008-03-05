@@ -77,10 +77,14 @@ void ScreenWindow::setFoldOpen(int line,bool open)
 {
 	Q_ASSERT(foldType(mapToScreen(line)) == FoldStart);
 
+	updateFilterDataSize();
+
 	_filterData.expanded.setBit(mapToScreen(line),open);
 }
 void ScreenWindow::setFold(int startLine,int endLine,bool fold)
 {
+	updateFilterDataSize();
+
 	const int screenLine = mapToScreen(startLine);
 	const int screenEndLine = mapToScreen(endLine);
 
@@ -100,6 +104,8 @@ void ScreenWindow::removeAllFolds()
 }
 void ScreenWindow::updateFilter()
 {
+	updateFilterDataSize();
+
 	int count = lineCount();
 
 	// mark all lines as visible
@@ -302,7 +308,17 @@ int ScreenWindow::lineCount() const
 {
     return _screen->getHistLines() + _screen->getLines();
 }
+void ScreenWindow::updateFilterDataSize()
+{
+	int size = lineCount();
 
+	if (_filterData.foldStarts.size() != size)
+	{
+		_filterData.foldStarts.resize(size);
+		_filterData.foldEnds.resize(size);
+		_filterData.filteredLines.resize(size);
+	}
+}
 int ScreenWindow::columnCount() const
 {
     return _screen->getColumns();

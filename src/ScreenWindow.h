@@ -256,6 +256,7 @@ private:
 
 	void updateFilter();
 	void getFilteredImage(Character* buffer,int size,int startLine,int endLine);
+	void updateFilterDataSize();
 
     Screen* _screen; // see setScreen() , screen()
 	Character* _windowBuffer;
