@@ -87,6 +87,8 @@ void ScreenWindow::setFoldOpen(int line,bool open)
 void ScreenWindow::setFold(int startLine,int endLine,bool fold)
 {
 	Q_ASSERT(startLine <= endLine);
+	
+	_filterData.enabled = true;
 
 	updateFilterDataSize();
 
@@ -100,7 +102,6 @@ void ScreenWindow::setFold(int startLine,int endLine,bool fold)
 	_filterData.foldEnds.setBit(endLine,fold);
 	_filterData.expanded.setBit(startLine,false);
 
-	_filterData.enabled = true;
 }
 void ScreenWindow::removeAllFolds()
 {
@@ -350,6 +351,9 @@ int ScreenWindow::lineCount() const
 }
 void ScreenWindow::updateFilterDataSize()
 {
+	if (!_filterData.enabled)
+		return;
+
 	int size = lineCount();
 
 	if (_filterData.foldStarts.size() != size)
