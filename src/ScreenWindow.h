@@ -21,12 +21,14 @@
 #define SCREENWINDOW_H
 
 // Qt
+#include <QtCore/QBitArray>
 #include <QtCore/QObject>
 #include <QtCore/QPoint>
 #include <QtCore/QRect>
 
 // Konsole
 #include "Character.h"
+#include "TerminalCharacterDecoder.h"
 
 namespace Konsole
 {
@@ -208,6 +210,11 @@ public:
      */
     QString selectedText( bool preserveLineBreaks ) const;
 
+	void setFold(int line,bool fold);
+	bool isFold(int line) const;
+	bool isFoldOpen(int line) const;
+	void setFoldOpen(int line,bool open);
+
 public slots:
     /** 
      * Notifies the window that the contents of the associated terminal screen have changed.
@@ -234,9 +241,15 @@ signals:
      */
     void selectionChanged();
 
+	
 private:
 	int endWindowLine() const;
 	void fillUnusedArea();
+	int mapToScreen(int line) const;
+
+	void updateFilter();
+	void getFilteredImage(Character* buffer,int size,int startLine,int endLine);
+	bool showLine(int line) const;
 
     Screen* _screen; // see setScreen() , screen()
 	Character* _windowBuffer;
@@ -248,6 +261,14 @@ private:
     bool _trackOutput; // see setTrackOutput() , trackOutput() 
     int  _scrollCount; // count of lines which the window has been scrolled by since
                        // the last call to resetScrollCount()
+
+	struct FilterData
+	{
+		QBitArray folds;
+		QBitArray expanded;
+		QBitArray filteredLines;
+	};
+	FilterData _filterData;
 };
 
 }

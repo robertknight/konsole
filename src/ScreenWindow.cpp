@@ -55,6 +55,101 @@ Screen* ScreenWindow::screen() const
     return _screen;
 }
 
+bool ScreenWindow::isFold(int line) const
+{
+	return _filterData.folds.testBit(mapToScreen(line));
+}
+bool ScreenWindow::isFoldOpen(int line) const
+{
+	Q_ASSERT(isFold(mapToScreen(line)));
+
+	return _filterData.expanded.testBit(mapToScreen(line));
+}
+void ScreenWindow::setFoldOpen(int line,bool open)
+{
+	Q_ASSERT(isFold(mapToScreen(line)));
+
+	_filterData.expanded.setBit(mapToScreen(line),open);
+}
+void ScreenWindow::setFold(int line,bool fold)
+{
+	const int screenLine = mapToScreen(line);
+
+	_filterData.folds.setBit(screenLine,fold);
+	_filterData.expanded.setBit(screenLine,false);
+}
+
+bool ScreenWindow::showLine(int line) const
+{
+	Q_ASSERT( line >= 0 && line < lineCount() );
+	
+	for (int i = line;i >= 0;i--)
+		if (_filterData.folds.testBit(i))
+			return _filterData.expanded.testBit(i);
+
+	return true;
+}
+
+void ScreenWindow::updateFilter()
+{
+	int count = lineCount();
+
+	_filterData.filteredLines.fill(true,count);
+
+	for (int i=0;i<count;i++)
+	{
+		_filterData.filteredLines[i] = showLine(i);	
+	}
+}
+
+void ScreenWindow::getFilteredImage(Character* buffer,int size,int startLine,int endLine)
+{
+	Q_ASSERT( startLine <= endLine );
+	Q_ASSERT( size >= (startLine-endLine+1)*windowColumns() );
+
+	updateFilter();
+
+
+	// find first line to copy
+	int startFrom = 0;
+	int visibleLineCount = 0;
+	for (int i=0;i<endLine;i++)
+	{
+		if (_filterData.filteredLines[i])
+			visibleLineCount++;
+
+		if (visibleLineCount >= startLine)
+			break;
+
+		startFrom++;
+	}
+
+//	qDebug() << "Copying from line" << startFrom;
+
+	Q_ASSERT( startFrom >= startLine );
+
+	// copy visible lines
+	int count = 0;
+	for (int i=startFrom ; count < (endLine-startLine+1) && i < lineCount() ; i++)
+	{
+		if (_filterData.filteredLines[i])
+		{
+//			qDebug() << "Copying line" << i;
+
+			_screen->getImage(_windowBuffer + (windowColumns()*count), windowColumns() ,i,i);
+			visibleLineCount++;
+			count++;
+		}
+	}
+
+	// fill unused area
+	int charsToFill = ((endLine-startLine+1) - count) * windowColumns();
+
+	Q_ASSERT( (windowColumns()*count + charsToFill) <= size );
+
+	Screen::fillWithDefaultChar(_windowBuffer + (windowColumns()*count) , charsToFill);
+}
+
 Character* ScreenWindow::getImage()
 {
 	// reallocate internal buffer if the window size has changed
@@ -132,15 +227,18 @@ void ScreenWindow::getSelectionEnd( int& column , int& line )
 }
 void ScreenWindow::setSelectionStart( int column , int line , bool columnMode )
 {
-    _screen->setSelectionStart( column , qMin(line + currentLine(),endWindowLine())  , columnMode);
+    _screen->setSelectionStart( column , mapToScreen(line)  , columnMode);
 	
 	_bufferNeedsUpdate = true;
     emit selectionChanged();
 }
-
+int ScreenWindow::mapToScreen(int line) const
+{
+	return qMin(line+currentLine(),endWindowLine());
+}
 void ScreenWindow::setSelectionEnd( int column , int line )
 {
-    _screen->setSelectionEnd( column , qMin(line + currentLine(),endWindowLine()) );
+    _screen->setSelectionEnd( column , mapToScreen(line) );
 
 	_bufferNeedsUpdate = true;
     emit selectionChanged();
@@ -148,7 +246,7 @@ void ScreenWindow::setSelectionEnd( int column , int line )
 
 bool ScreenWindow::isSelected( int column , int line )
 {
-    return _screen->isSelected( column , qMin(line + currentLine(),endWindowLine()) );
+    return _screen->isSelected( column , mapToScreen(line) );
 }
 
 void ScreenWindow::clearSelection()
