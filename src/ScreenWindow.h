@@ -151,6 +151,13 @@ public:
     
     /** Returns the total number of lines in the screen */
     int lineCount() const;
+	/** 
+	 * Returns the number of visible lines in the screen in this window.
+	 * This is lineCount() minus the number of lines hidden because they are
+	 * inside closed folds.
+	 */
+	int visibleLineCount() const;
+
     /** Returns the total number of columns in the screen */
     int columnCount() const;
 
@@ -210,18 +217,20 @@ public:
      */
     QString selectedText( bool preserveLineBreaks ) const;
 
-	void setFold(int startLine,int endLine,bool fold);
+	// TODO: The fold commands take line arguments in 'Screen' coordinates
+	// whereas the other commands in ScreenWindow take line arguments in
+	// window coordinates and convert to 'Screen' coordinates
+	void setFold(int screenStartLine,int screenEndLine,bool fold);
 	enum FoldType
 	{
 		FoldNone,
 		FoldStart,
 		FoldEnd
 	};
-	FoldType foldType(int line) const;
-	bool isFoldOpen(int line) const;
-	void setFoldOpen(int line,bool open);
+	FoldType foldType(int screenLine) const;
+	bool isFoldOpen(int screenLine) const;
+	void setFoldOpen(int screenLine,bool open);
 	void removeAllFolds();
-	
 	void createFilterFolds(const QString& filter);
 
 public slots:
@@ -273,10 +282,12 @@ private:
 
 	struct FilterData
 	{
+		bool enabled;
 		QBitArray foldStarts;
 		QBitArray foldEnds;
 		QBitArray expanded;
 		QBitArray filteredLines;
+		int visibleLines;
 	};
 	FilterData _filterData;
 };

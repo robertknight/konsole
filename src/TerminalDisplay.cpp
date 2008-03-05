@@ -881,7 +881,7 @@ void TerminalDisplay::updateImage()
   int lines = _screenWindow->windowLines();
   int columns = _screenWindow->windowColumns();
 
-  setScroll( _screenWindow->currentLine() , _screenWindow->lineCount() );
+  setScroll( _screenWindow->currentLine() , _screenWindow->visibleLineCount() );
 
   if (!_image)
      updateImageSize(); // Create _image
