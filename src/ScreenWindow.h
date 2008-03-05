@@ -220,6 +220,7 @@ public:
 	FoldType foldType(int line) const;
 	bool isFoldOpen(int line) const;
 	void setFoldOpen(int line,bool open);
+	void removeAllFolds();
 
 public slots:
     /** 

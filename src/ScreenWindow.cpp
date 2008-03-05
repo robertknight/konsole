@@ -84,11 +84,20 @@ void ScreenWindow::setFold(int startLine,int endLine,bool fold)
 	const int screenLine = mapToScreen(startLine);
 	const int screenEndLine = mapToScreen(endLine);
 
+	// check that fold status makes sense
+	Q_ASSERT(_filterData.foldStarts.testBit(screenLine) ==
+			 _filterData.foldEnds.testBit(screenEndLine));	
+
 	_filterData.foldStarts.setBit(screenLine,fold);
 	_filterData.foldEnds.setBit(screenEndLine,fold);
 	_filterData.expanded.setBit(screenLine,false);
 }
-
+void ScreenWindow::removeAllFolds()
+{
+	_filterData.foldStarts.fill(false);
+	_filterData.foldEnds.fill(false);
+	_filterData.filteredLines.fill(false);
+}
 void ScreenWindow::updateFilter()
 {
 	int count = lineCount();
