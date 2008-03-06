@@ -90,7 +90,7 @@ void PlainTextDecoder::decodeLine(const Character* const characters, int count, 
 
 void PlainTextDecoder::decode(QString& text, const Character* buffer, int size)
 {
-	Q_ASSERT(text.count() > size);
+	Q_ASSERT(text.count() >= size);
 
 	for (int i=0;i<size;i++)
 		text[i] = buffer[i].character;
