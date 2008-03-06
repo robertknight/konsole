@@ -21,8 +21,11 @@
 #include "ScreenWindow.h"
 
 // Qt
-#include <KDebug>
 #include <QStack>
+#include <QRegExp>
+
+// KDE
+#include <KDebug>
 
 // Konsole
 #include "Screen.h"
@@ -372,7 +375,7 @@ void ScreenWindow::notifyOutputChanged()
 
     emit outputChanged(); 
 }
-void ScreenWindow::setFilter(const QString& filter)
+void ScreenWindow::setFilter(const QRegExp& filter)
 {
 	_filter = filter;
 	
@@ -381,7 +384,7 @@ void ScreenWindow::setFilter(const QString& filter)
 
 	emit outputChanged();
 }
-void ScreenWindow::createFilterFolds(const QString& filter)
+void ScreenWindow::createFilterFolds(const QRegExp& filter)
 {
 	_filterNeedsUpdate = false;
 	_folds.setLineCount(lineCount());

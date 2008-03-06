@@ -275,7 +275,7 @@ public slots:
      */
     void notifyOutputChanged();
 
-	void setFilter(const QString& filter);
+	void setFilter(const QRegExp& filter);
 
 signals:
     /**
@@ -302,7 +302,7 @@ private:
 	int mapToScreen(int line) const;
 
 	void getFilteredImage(Character* buffer,int size,int startLine,int endLine);
-	void createFilterFolds(const QString& filter);
+	void createFilterFolds(const QRegExp& filter);
 
     Screen* _screen; // see setScreen() , screen()
 	Character* _windowBuffer;
@@ -318,7 +318,7 @@ private:
                        // the last call to resetScrollCount()
 
 	Folds _folds;
-	QString _filter;
+	QRegExp _filter;
 };
 
 

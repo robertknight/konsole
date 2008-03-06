@@ -394,7 +394,7 @@ void SessionController::removeSearchFilter()
     _searchFilter = 0;
 
 	if (_view->screenWindow())
-		_view->screenWindow()->setFilter(QString());
+		_view->screenWindow()->setFilter(QRegExp());
 }
 
 void SessionController::setSearchBar(IncrementalSearchBar* searchBar)
@@ -810,7 +810,7 @@ void SessionController::searchTextChanged(const QString& text)
     beginSearch(text , SearchHistoryTask::ForwardsSearch);
 
 	if (_searchBar->filter())
-		_view->screenWindow()->setFilter(text);
+		_view->screenWindow()->setFilter(QRegExp(text));
 }
 void SessionController::searchCompleted(bool success)
 {
