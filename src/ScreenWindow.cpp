@@ -271,8 +271,18 @@ QPoint ScreenWindow::cursorPosition() const
 {
     QPoint position;
     
+	int cursorLine = _screen->getHistLines() + _screen->getCursorY();
+	int visibleCursorLine = _folds.mapToVisibleLine(cursorLine,true);
+	int visibleCurrentLine = _folds.mapToVisibleLine(currentLine(),false);
+
+	Q_ASSERT(visibleCursorLine != -1);
+	Q_ASSERT(visibleCurrentLine != -1);
+
+	//if (visibleCursorLine == -1)
+	//	return QPoint(0,0);
+
     position.setX( _screen->getCursorX() );
-    position.setY( _screen->getCursorY() );
+    position.setY( visibleCursorLine - visibleCurrentLine );
 
     return position; 
 }
@@ -506,5 +516,31 @@ void Folds::updateVisibleLines()
 
 	_visibleLines = _filteredLines.count(true);
 }
+int Folds::mapToVisibleLine(int bufferLine,bool assumeVisible) const
+{
+	if (!_enabled)
+		return bufferLine;
+	else if (!_filteredLines.testBit(bufferLine) && !assumeVisible)
+		return -1; 
+	else
+	{
+		bool wasVisible = _filteredLines.testBit(bufferLine);
+		if (assumeVisible)
+			const_cast<Folds*>(this)->_filteredLines.setBit(bufferLine,true);
+
+		int visibleCount = 0;
+		int index = 0;
+		while (index < bufferLine)
+		{
+			visibleCount += isLineVisible(index);
+			index++;
+		}
+
+		const_cast<Folds*>(this)->_filteredLines.setBit(bufferLine,wasVisible);
+
+		return visibleCount;
+	}
+}
+
 
 #include "ScreenWindow.moc"

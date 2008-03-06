@@ -87,7 +87,7 @@ public:
 	 * Returns the original line index of a visible line.
 	 *
 	 * If there are no hidden lines before @p visibleLine then the result
-	 * will be @p visibleLine.  Otherwise the result will be @p visibleLine minus
+	 * will be @p visibleLine.  Otherwise the result will be @p visibleLine plus
 	 * the number of hidden lines before it.
 	 *
 	 * @p visibleLine may be greater than the line count set with setLineCount(), in which
@@ -96,6 +96,19 @@ public:
 	 * Performance is O(@p visibleLine)
 	 */
 	int mapToBufferLine(int visibleLine) const;
+
+	/**
+	 * Maps a line index in the buffer to the visible line.  The result will be 
+	 * @p bufferLine minus the number of hidden lines before it.  If @p bufferLine 
+	 * is not visible and @p assumeVisible is false then the result will be -1
+	 *
+	 * If @p assumeVisible is true then @p bufferLine is treated as if it was visible,
+	 * even if it is actually hidden, in which case the result will be the count
+	 * of visible lines before @p bufferLine
+	 *
+	 * Performance is O(@p bufferLine)
+	 */
+	int mapToVisibleLine(int bufferLine , bool assumeVisible) const;
 
 private:
 
