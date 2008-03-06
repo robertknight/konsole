@@ -370,7 +370,8 @@ void MainWindow::setupWidgets()
     QWidget* widget = new QWidget(this);
     QVBoxLayout* layout = new QVBoxLayout();
 
-    _searchBar = new IncrementalSearchBar( IncrementalSearchBar::AllFeatures , this);
+    _searchBar = new IncrementalSearchBar( IncrementalSearchBar::AllFeatures |
+										   IncrementalSearchBar::Filter , this);
     _searchBar->setVisible(false);
 
     layout->addWidget( _viewManager->widget() );

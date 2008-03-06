@@ -87,7 +87,7 @@ public:
      * This enum defines the features which can be supported by an implementation of
      * an incremental search bar
      */
-    enum Features
+    enum Feature
     {
         /** search facility supports highlighting of all matches */
         HighlightMatches = 1,
@@ -95,9 +95,12 @@ public:
         MatchCase        = 2,
         /** search facility supports regular expressions */
         RegExp           = 4,
+		/** search facility supports filtering output */
+		Filter			 = 8,
         /** search facility supports all features */
         AllFeatures      = HighlightMatches | MatchCase | RegExp
     };
+	Q_DECLARE_FLAGS(Features,Feature);
 
     /** 
      * Constructs a new incremental search bar with the given parent widget 
@@ -144,6 +147,9 @@ public:
      */
     bool matchRegExp();
 
+	/** Returns whether the output should be filtered to show only the current search text. */
+	bool filter() const;
+
     // reimplemented
     virtual void setVisible( bool visible );
 signals:
@@ -171,6 +177,12 @@ signals:
     /** Emitted when the close button is clicked */
     void closeClicked();
 
+	/** 
+	 * Emitted when the user toggles the checkbox to indicate whether
+	 * output should be filtered to lines matching the search text. 
+	 */
+	void filterToggled(bool);
+
 protected:
     virtual bool eventFilter( QObject* watched , QEvent* event );
 
@@ -182,6 +194,7 @@ private:
     QCheckBox* _matchCaseBox;
     QCheckBox* _matchRegExpBox;
     QCheckBox* _highlightBox;
+	QCheckBox* _filterBox;
 
     QLineEdit* _searchEdit;
     QLabel* _continueLabel;
@@ -189,6 +202,7 @@ private:
 
     QTimer* _searchTimer;
 };
+Q_DECLARE_OPERATORS_FOR_FLAGS(IncrementalSearchBar::Features)
 
 }
 #endif // INCREMENTALSEARCHBAR_H

@@ -43,6 +43,7 @@ IncrementalSearchBar::IncrementalSearchBar(Features features , QWidget* parent)
     , _matchCaseBox(0)
     , _matchRegExpBox(0)
     , _highlightBox(0)
+	, _filterBox(0)
     , _searchEdit(0)
     , _continueLabel(0)
 {
@@ -120,6 +121,14 @@ IncrementalSearchBar::IncrementalSearchBar(Features features , QWidget* parent)
         connect( _matchRegExpBox , SIGNAL(toggled(bool)) , this , SIGNAL(matchRegExpToggled(bool)) );
     }
 
+	if ( features & Filter )
+	{
+		_filterBox = new QCheckBox(i18n("Filter"),this);
+		_filterBox->setObjectName("filter-box");
+		_filterBox->setToolTip(i18n("Filter output to show only lines matching the search phrase"));
+		connect( _filterBox , SIGNAL(toggled(bool)) , this , SIGNAL(filterToggled(bool)) );
+	}
+
     QProgressBar* _progress = new QProgressBar(this);
     _progress->setMinimum(0);
     _progress->setMaximum(0);
@@ -138,7 +147,8 @@ IncrementalSearchBar::IncrementalSearchBar(Features features , QWidget* parent)
     if ( features & HighlightMatches ) layout->addWidget(_highlightBox);
     if ( features & MatchCase        ) layout->addWidget(_matchCaseBox);
     if ( features & RegExp           ) layout->addWidget(_matchRegExpBox);
-    
+   	if ( features & Filter			 ) layout->addWidget(_filterBox);
+
     layout->addWidget(_progress);
     layout->addWidget(_continueLabel);
     layout->addStretch();
@@ -188,7 +198,13 @@ bool IncrementalSearchBar::matchRegExp()
         return _matchRegExpBox->isChecked();
     }
 }
-
+bool IncrementalSearchBar::filter() const
+{
+	if ( !_filterBox)
+		return false;
+	else
+		return _filterBox->isChecked();
+}
 bool IncrementalSearchBar::eventFilter(QObject* watched , QEvent* event)
 {
     if ( watched == _searchEdit )

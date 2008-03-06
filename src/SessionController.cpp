@@ -392,6 +392,9 @@ void SessionController::removeSearchFilter()
     _view->filterChain()->removeFilter(_searchFilter);
     delete _searchFilter;
     _searchFilter = 0;
+
+	if (_view->screenWindow())
+		_view->screenWindow()->setFilter(QString());
 }
 
 void SessionController::setSearchBar(IncrementalSearchBar* searchBar)
@@ -805,6 +808,9 @@ void SessionController::searchTextChanged(const QString& text)
     // update search.  this is called even when the text is
     // empty to clear the view's filters
     beginSearch(text , SearchHistoryTask::ForwardsSearch);
+
+	if (_searchBar->filter())
+		_view->screenWindow()->setFilter(text);
 }
 void SessionController::searchCompleted(bool success)
 {
