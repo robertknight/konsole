@@ -83,6 +83,19 @@ public:
 	 * updateVisibleLines() was called.
 	 */
 	int visibleLineCount() const;
+	/**
+	 * Returns the original line index of a visible line.
+	 *
+	 * If there are no hidden lines before @p visibleLine then the result
+	 * will be @p visibleLine.  Otherwise the result will be @p visibleLine minus
+	 * the number of hidden lines before it.
+	 *
+	 * @p visibleLine may be greater than the line count set with setLineCount(), in which
+	 * case any lines beyond the last line will be considered visible.
+	 *
+	 * Performance is O(@p visibleLine)
+	 */
+	int mapToBufferLine(int visibleLine) const;
 
 private:
 
@@ -105,6 +118,22 @@ inline int Folds::visibleLineCount() const
 inline int Folds::count() const
 {
 	return _enabled ? _foldStarts.count(true) : 0;
+}
+inline int Folds::mapToBufferLine(int visibleLine) const
+{
+	if (!_enabled)
+		return visibleLine;
+	else
+	{
+		int result = 0;
+		int visibleCount = 0;
+		while (visibleCount < visibleLine)
+		{
+			visibleCount += (result < _filteredLines.count()) ? isLineVisible(result) : 1;
+			result++;
+		}
+		return result;
+	}		
 }
 
 /**

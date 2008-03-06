@@ -205,7 +205,7 @@ void ScreenWindow::setSelectionStart( int column , int line , bool columnMode )
 }
 int ScreenWindow::mapToScreen(int line) const
 {
-	return qMin(line+currentLine(),endWindowLine());
+	return _folds.mapToBufferLine(qMin(line+currentLine(),endWindowLine()));
 }
 void ScreenWindow::setSelectionEnd( int column , int line )
 {
