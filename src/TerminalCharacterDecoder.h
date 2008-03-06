@@ -92,6 +92,9 @@ public:
 	/** 
 	 * Decode a character buffer directly into a string.  @p text
 	 * must have at least @p size characters.
+	 *
+	 * This method can be used to decode small Character buffers quickly without
+	 * the overhead of allocating a buffer for the string on each call.
 	 */
    	static void decode(QString& text, const Character* buffer, int size);
 
