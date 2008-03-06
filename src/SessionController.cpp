@@ -810,7 +810,7 @@ void SessionController::searchTextChanged(const QString& text)
     beginSearch(text , SearchHistoryTask::ForwardsSearch);
 
 	if (_searchBar->filter())
-		_view->screenWindow()->setFilter(QRegExp(text));
+		_view->screenWindow()->setFilter(_searchBar->searchRegExp());
 }
 void SessionController::searchCompleted(bool success)
 {

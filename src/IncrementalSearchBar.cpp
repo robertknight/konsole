@@ -161,9 +161,16 @@ void IncrementalSearchBar::notifySearchChanged()
 {
     emit searchChanged( searchText() );
 }
-QString IncrementalSearchBar::searchText()
+QString IncrementalSearchBar::searchText() const
 {
     return _searchEdit->text();
+}
+QRegExp IncrementalSearchBar::searchRegExp() const
+{
+	QRegExp result( searchText() , 	matchCase() ? Qt::CaseSensitive : Qt::CaseInsensitive ,
+									matchRegExp() ? QRegExp::RegExp : QRegExp::FixedString );
+
+	return result;
 }
 bool IncrementalSearchBar::highlightMatches()
 {
@@ -176,7 +183,7 @@ bool IncrementalSearchBar::highlightMatches()
         return _highlightBox->isChecked();
     }
 }
-bool IncrementalSearchBar::matchCase()
+bool IncrementalSearchBar::matchCase() const
 {
     if ( !_matchCaseBox )
     {
@@ -187,7 +194,7 @@ bool IncrementalSearchBar::matchCase()
         return _matchCaseBox->isChecked();
     }
 }
-bool IncrementalSearchBar::matchRegExp()
+bool IncrementalSearchBar::matchRegExp() const
 {
     if ( !_matchRegExpBox )
     {

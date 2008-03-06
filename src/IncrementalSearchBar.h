@@ -130,7 +130,15 @@ public:
     void setContinueFlag( Continue flag );
 
     /** Returns the current search text */
-    QString searchText();
+    QString searchText() const;
+	
+	/** 
+	 * Returns the current search text as a regular expression.
+	 * The case sensitivity and pattern syntax of the returned QRegExp will be set 
+	 * according to matchRegExp() and matchCase()
+	 */
+	QRegExp searchRegExp() const;
+
     /** 
      * Returns whether matches for the current search text should be highlighted in the document. 
      * Always returns true if the highlight matches checkbox is not visible. 
@@ -140,12 +148,12 @@ public:
      * Returns whether matching for the current search text should be case sensitive.
      * Always returns false if the match case checkbox is not visible.
      */
-    bool matchCase();
+    bool matchCase() const;
     /** 
      * Returns whether the current search text should be treated as plain text or a regular expression 
      * Always returns false if the match regular expression checkbox is not visible.
      */
-    bool matchRegExp();
+    bool matchRegExp() const;
 
 	/** Returns whether the output should be filtered to show only the current search text. */
 	bool filter() const;
