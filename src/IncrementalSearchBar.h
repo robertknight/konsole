@@ -129,7 +129,10 @@ public:
      */
     void setContinueFlag( Continue flag );
 
-    /** Returns the current search text */
+    /** 
+	 * Returns the current search text.
+	 * Leading and trailing spaces around the search text are stripped. 
+	 */
     QString searchText() const;
 	
 	/** 

@@ -218,10 +218,9 @@ private slots:
 
 private:
     // begins the search
-    // text - pattern to search for
     // direction - value from SearchHistoryTask::SearchDirection enum to specify
     //             the search direction
-    void beginSearch(const QString& text , int direction);
+    void beginSearch(int direction);
     void setupActions();
     void removeSearchFilter(); // remove and delete the current search filter if set
     void setFindNextPrevEnabled(bool enabled);

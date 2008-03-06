@@ -166,7 +166,7 @@ void IncrementalSearchBar::notifySearchChanged()
 }
 QString IncrementalSearchBar::searchText() const
 {
-    return _searchEdit->text();
+    return _searchEdit->text().trimmed();
 }
 QRegExp IncrementalSearchBar::searchRegExp() const
 {

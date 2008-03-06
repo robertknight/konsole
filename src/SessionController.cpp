@@ -807,7 +807,7 @@ void SessionController::searchTextChanged(const QString& text)
 
     // update search.  this is called even when the text is
     // empty to clear the view's filters
-    beginSearch(text , SearchHistoryTask::ForwardsSearch);
+    beginSearch(SearchHistoryTask::ForwardsSearch);
 
 	if (_searchBar->filter())
 		_view->screenWindow()->setFilter(_searchBar->searchRegExp());
@@ -818,21 +818,20 @@ void SessionController::searchCompleted(bool success)
         _searchBar->setFoundMatch(success);
 }
 
-void SessionController::beginSearch(const QString& text , int direction)
+void SessionController::beginSearch(int direction)
 {
     Q_ASSERT( _searchBar );
     Q_ASSERT( _searchFilter );
 
-    QRegExp regExp( text.trimmed() ,  _searchBar->caseSensitivity() , _searchBar->patternSyntax() );
-    _searchFilter->setRegExp(regExp);
+    _searchFilter->setRegExp(_searchBar->searchRegExp());
 
-    if ( !regExp.isEmpty() )
+    if ( !_searchBar->searchRegExp().isEmpty() )
     {
         SearchHistoryTask* task = new SearchHistoryTask(this);
 
         connect( task , SIGNAL(completed(bool)) , this , SLOT(searchCompleted(bool)) );
 
-        task->setRegExp(regExp);
+        task->setRegExp(_searchBar->searchRegExp());
         task->setSearchDirection( (SearchHistoryTask::SearchDirection)direction );
         task->setAutoDelete(true);
         task->addScreenWindow( _session , _view->screenWindow() );
@@ -860,14 +859,14 @@ void SessionController::findNextInHistory()
     Q_ASSERT( _searchBar );
     Q_ASSERT( _searchFilter );
 
-    beginSearch(_searchBar->searchText(),SearchHistoryTask::ForwardsSearch);
+    beginSearch(SearchHistoryTask::ForwardsSearch);
 }
 void SessionController::findPreviousInHistory()
 {
     Q_ASSERT( _searchBar );
     Q_ASSERT( _searchFilter );
 
-    beginSearch(_searchBar->searchText(),SearchHistoryTask::BackwardsSearch);
+    beginSearch(SearchHistoryTask::BackwardsSearch);
 }
 void SessionController::showHistoryOptions()
 {
