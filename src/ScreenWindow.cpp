@@ -38,7 +38,7 @@ ScreenWindow::ScreenWindow(QObject* parent)
 	, _windowBuffer(0)
 	, _windowBufferSize(0)
 	, _bufferNeedsUpdate(true)
-	, _filterNeedsUpdate(false)
+	, _filterState(Current)
 	, _windowLines(1)
     , _currentLine(0)
     , _trackOutput(true)
@@ -109,7 +109,7 @@ void ScreenWindow::getFilteredImage(Character* buffer,int size,int startLine,int
 Character* ScreenWindow::getImage()
 {
 	// update filter if necessary
-	if (_filterNeedsUpdate)
+	if (_filterState != Current)
 	{
 		createFilterFolds(_filter);
 	}
@@ -374,7 +374,7 @@ void ScreenWindow::notifyOutputChanged()
     }
 
 	_bufferNeedsUpdate = true;
-	_filterNeedsUpdate = true;
+	_filterState = NeedsPartialUpdate;
 
     emit outputChanged(); 
 }
@@ -383,7 +383,7 @@ void ScreenWindow::setFilter(const QRegExp& filter)
 	_filter = filter;
 	
 	_bufferNeedsUpdate = true;
-	_filterNeedsUpdate = true;
+	_filterState = NeedsFullUpdate; 
 
 	// if output tracking is enabled then the current line number needs to be updated
 	// so that it is correct after the filter update, so re-calculate the folds
@@ -400,8 +400,12 @@ void ScreenWindow::setFilter(const QRegExp& filter)
 }
 void ScreenWindow::createFilterFolds(const QRegExp& filter)
 {
-	_filterNeedsUpdate = false;
-	_folds.removeAll();
+	bool partialUpdate = _filterState == NeedsPartialUpdate;
+
+	_filterState = Current;
+
+	if (!partialUpdate)
+		_folds.removeAll();
 	
 	if (filter.isEmpty())
 	{
@@ -413,14 +417,15 @@ void ScreenWindow::createFilterFolds(const QRegExp& filter)
 	
 	const int count = lineCount();
 	const int lastLine = count - 1;
-	const int firstLine = 0;
+	const int firstLine = (partialUpdate ? count - _screen->getLines() : 0);
 	const int columns = windowColumns();
 
 	Character buffer[columns];
 	QString lineText(columns,' ');
 	int foldStart = -1;
 
-	for (int i=0;i<count;i++)
+	for (int i = firstLine;
+		 i<count;i++)
 	{
 		_screen->getImage(buffer,columns,i,i);
 

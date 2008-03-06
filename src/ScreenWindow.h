@@ -394,7 +394,14 @@ private:
 	int _windowBufferSize;
 	
 	bool _bufferNeedsUpdate;
-	bool _filterNeedsUpdate;
+	
+	enum FilterState
+	{
+		Current,
+		NeedsPartialUpdate,
+		NeedsFullUpdate
+	};
+	FilterState _filterState;
 
 	int  _windowLines;
     int  _currentLine; // see scrollTo() , currentLine()
