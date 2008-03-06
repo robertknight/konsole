@@ -307,7 +307,9 @@ private:
     Screen* _screen; // see setScreen() , screen()
 	Character* _windowBuffer;
 	int _windowBufferSize;
+	
 	bool _bufferNeedsUpdate;
+	bool _filterNeedsUpdate;
 
 	int  _windowLines;
     int  _currentLine; // see scrollTo() , currentLine()

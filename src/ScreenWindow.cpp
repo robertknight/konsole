@@ -35,6 +35,7 @@ ScreenWindow::ScreenWindow(QObject* parent)
 	, _windowBuffer(0)
 	, _windowBufferSize(0)
 	, _bufferNeedsUpdate(true)
+	, _filterNeedsUpdate(false)
 	, _windowLines(1)
     , _currentLine(0)
     , _trackOutput(true)
@@ -105,7 +106,7 @@ void ScreenWindow::getFilteredImage(Character* buffer,int size,int startLine,int
 Character* ScreenWindow::getImage()
 {
 	// update filter if necessary
-	if (!_filter.isEmpty() && _bufferNeedsUpdate)
+	if (_filterNeedsUpdate)
 	{
 		createFilterFolds(_filter);
 	}
@@ -367,23 +368,22 @@ void ScreenWindow::notifyOutputChanged()
     }
 
 	_bufferNeedsUpdate = true;
+	_filterNeedsUpdate = true;
 
     emit outputChanged(); 
 }
 void ScreenWindow::setFilter(const QString& filter)
 {
 	_filter = filter;
+	
 	_bufferNeedsUpdate = true;
-
-	// when the filter is non-empty the filter folds will be updated
-	// when getImage() is called
-	if (filter.isEmpty())
-		createFilterFolds(filter);
+	_filterNeedsUpdate = true;
 
 	emit outputChanged();
 }
 void ScreenWindow::createFilterFolds(const QString& filter)
 {
+	_filterNeedsUpdate = false;
 	_folds.setLineCount(lineCount());
 	_folds.removeAll();
 	
