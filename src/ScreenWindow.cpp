@@ -273,7 +273,7 @@ QPoint ScreenWindow::cursorPosition() const
     
 	int cursorLine = _screen->getHistLines() + _screen->getCursorY();
 	int visibleCursorLine = _folds.mapToVisibleLine(cursorLine,true);
-	int visibleCurrentLine = _folds.mapToVisibleLine(currentLine(),false);
+	int visibleCurrentLine = _folds.mapToVisibleLine(currentLine(),true);
 
 	Q_ASSERT(visibleCursorLine != -1);
 	Q_ASSERT(visibleCurrentLine != -1);
@@ -392,7 +392,18 @@ void ScreenWindow::setFilter(const QRegExp& filter)
 	_bufferNeedsUpdate = true;
 	_filterNeedsUpdate = true;
 
-	emit outputChanged();
+	// if output tracking is enabled then the current line number needs to be updated
+	// so that it is correct after the filter update, so re-calculate the folds
+	// and line visibility.  Otherwise defer the update until a view asks for it
+	// by calling getImage()
+	if (_trackOutput)
+	{	
+		createFilterFolds(filter);
+		_folds.updateVisibleLines();
+		notifyOutputChanged();
+	}
+	else
+		emit outputChanged();
 }
 void ScreenWindow::createFilterFolds(const QRegExp& filter)
 {
