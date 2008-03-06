@@ -35,10 +35,24 @@ namespace Konsole
 
 class Screen;
 
+/** 
+ * Support class for ScreenWindow.
+ * Stores fold points associated with a buffer containing lines of text and provides
+ * methods to query the visibility of individual lines depending on the state 
+ * (expanded of collapsed) of those fold points.
+ *
+ * The line visiblity information must be updated manually after any changes to folds
+ * or the line count by calling updateVisibleLines()
+ */
 class Folds
 {
 public:
-	void setFold(int screenStartLine,int screenEndLine, bool open);
+	/** 
+	 * Create a fold between startLine and endLine, which is initially expanded if @p open is true
+	 * or collapsed otherwise.
+	 */
+	void setFold(int startLine,int endLine, bool open);
+	/** Removes all fold points */
 	void removeAll();
 	enum Type
 	{
@@ -46,14 +60,28 @@ public:
 		FoldStart,
 		FoldEnd
 	};
-	Type type(int screenLine) const;
-	bool isOpen(int screenLine) const;
-	void setOpen(int screenLine,bool open);
+	/** Returns the type of fold point at a particular line */
+	Type type(int line) const;
+	/** Returns true if the fold point at @p line is expanded or false if it is collapsed. */
+	bool isOpen(int line) const;
+	/** Sets whether the fold point at @p line is expanded or collapsed. */
+	void setOpen(int line,bool open);
+	/** Returns the total number of fold points. */
 	int count() const;
+	/** Sets the number of lines in the associated buffer. */
 	void setLineCount(int count);
 
+	/** Updates the visibility information for each line in the buffer. */
 	void updateVisibleLines();
+	/** 
+	 * Returns true if @p line is currently visible.  This information is correct 
+	 * at the time updateVisibleLines() was last called.
+	 */
 	bool isLineVisible(int line) const;
+	/** 
+	 * Returns the total number of visible lines, correct at the last time
+	 * updateVisibleLines() was called.
+	 */
 	int visibleLineCount() const;
 
 private:
@@ -275,7 +303,13 @@ public slots:
      */
     void notifyOutputChanged();
 
-	void setFilter(const QRegExp& filter);
+	/** 
+	 * Filter the contents of this window based on a pattern.
+	 * Lines whoose text matches @p pattern will remain visible, other lines will
+	 * be hidden.  If @p pattern is empty the filter will be removed and all lines 
+	 * will be shown.
+	 */
+	void setFilter(const QRegExp& pattern);
 
 signals:
     /**
