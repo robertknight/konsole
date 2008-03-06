@@ -516,5 +516,12 @@ void ScreenWindow::createFilterFolds(const QString& filter)
 		}
 	}
 }
+int ScreenWindow::foldCount() const
+{
+	if (!_filterData.enabled)
+		return 0;
+	else
+		return _filterData.foldStarts.count(true);
+}
 
 #include "ScreenWindow.moc"

@@ -155,6 +155,8 @@ public:
 	 * Returns the number of visible lines in the screen in this window.
 	 * This is lineCount() minus the number of lines hidden because they are
 	 * inside closed folds.
+	 *
+	 * If there are no closed folds, this will return lineCount()
 	 */
 	int visibleLineCount() const;
 
@@ -232,6 +234,7 @@ public:
 	void setFoldOpen(int screenLine,bool open);
 	void removeAllFolds();
 	void createFilterFolds(const QString& filter);
+	int foldCount() const;
 
 public slots:
     /** 
