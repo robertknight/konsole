@@ -56,8 +56,11 @@ public:
 	void removeAll();
 	enum Type
 	{
+		/** There are no fold points on the line */
 		FoldNone,
+		/** The line is the start of a fold */
 		FoldStart,
+		/** The line is the end of a fold */
 		FoldEnd
 	};
 	/** Returns the type of fold point at a particular line */
