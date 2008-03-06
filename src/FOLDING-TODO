@@ -1,0 +1,13 @@
+
+- Avoid re-doing folds for the entire screen on every call to ScreenWindow::notifyOutputChanged().
+  Instead only need to update:
+  	- 	Start of screen IF lines of output have been dropped (because of a full history buffer, no buffer or
+		if the history is cleared)
+		-	Shift fold bits along number of lines dropped
+		-	Move last fold end point to end of 'dead area' (section before the live area)
+  	- 	Live area of screen (any data in this area may have been altered)
+		- 	Erase any folds which are entirely in the live area
+		- 	Find fold end prior to start of live area
+		- 	Move fold end to line before first match in live area or last line of live
+			area if no matches in live area
+		- 	Process remainder of live area as normal
