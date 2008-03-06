@@ -202,6 +202,7 @@ private slots:
 
     void requireUrlFilterUpdate();
     void highlightMatches(bool highlight);
+	void setFilterActive(bool active);
 
     void scrollBackOptionsChanged(int mode , int lines);
 

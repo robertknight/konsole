@@ -393,8 +393,7 @@ void SessionController::removeSearchFilter()
     delete _searchFilter;
     _searchFilter = 0;
 
-	if (_view->screenWindow())
-		_view->screenWindow()->setFilter(QRegExp());
+	setFilterActive(false);
 }
 
 void SessionController::setSearchBar(IncrementalSearchBar* searchBar)
@@ -417,6 +416,7 @@ void SessionController::setSearchBar(IncrementalSearchBar* searchBar)
         connect( _searchBar , SIGNAL(findNextClicked()) , this , SLOT(findNextInHistory()) );
         connect( _searchBar , SIGNAL(findPreviousClicked()) , this , SLOT(findPreviousInHistory()) );
         connect( _searchBar , SIGNAL(highlightMatchesToggled(bool)) , this , SLOT(highlightMatches(bool)) );
+		connect( _searchBar , SIGNAL(filterToggled(bool)) , this , SLOT(setFilterActive(bool)) );
 
         // if the search bar was previously active
         // then re-enter search mode
@@ -839,6 +839,13 @@ void SessionController::beginSearch(int direction)
     }
 
     _view->processFilters();
+}
+void SessionController::setFilterActive(bool active)
+{
+	if (_view->screenWindow())
+	{
+		_view->screenWindow()->setFilter(active ? _searchBar->searchRegExp() : QRegExp());
+	}
 }
 void SessionController::highlightMatches(bool highlight)
 {
