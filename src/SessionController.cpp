@@ -823,10 +823,7 @@ void SessionController::beginSearch(const QString& text , int direction)
     Q_ASSERT( _searchBar );
     Q_ASSERT( _searchFilter );
 
-    Qt::CaseSensitivity caseHandling = _searchBar->matchCase() ? Qt::CaseSensitive : Qt::CaseInsensitive;
-    QRegExp::PatternSyntax syntax = _searchBar->matchRegExp() ? QRegExp::RegExp : QRegExp::FixedString;
-
-    QRegExp regExp( text.trimmed() ,  caseHandling , syntax );
+    QRegExp regExp( text.trimmed() ,  _searchBar->caseSensitivity() , _searchBar->patternSyntax() );
     _searchFilter->setRegExp(regExp);
 
     if ( !regExp.isEmpty() )

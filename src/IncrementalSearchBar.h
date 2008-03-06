@@ -135,7 +135,7 @@ public:
 	/** 
 	 * Returns the current search text as a regular expression.
 	 * The case sensitivity and pattern syntax of the returned QRegExp will be set 
-	 * according to matchRegExp() and matchCase()
+	 * according to patternSyntax() and caseSensitivity()
 	 */
 	QRegExp searchRegExp() const;
 
@@ -148,12 +148,12 @@ public:
      * Returns whether matching for the current search text should be case sensitive.
      * Always returns false if the match case checkbox is not visible.
      */
-    bool matchCase() const;
+    Qt::CaseSensitivity caseSensitivity() const;
     /** 
      * Returns whether the current search text should be treated as plain text or a regular expression 
      * Always returns false if the match regular expression checkbox is not visible.
      */
-    bool matchRegExp() const;
+    QRegExp::PatternSyntax patternSyntax() const;
 
 	/** Returns whether the output should be filtered to show only the current search text. */
 	bool filter() const;

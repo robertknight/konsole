@@ -167,10 +167,7 @@ QString IncrementalSearchBar::searchText() const
 }
 QRegExp IncrementalSearchBar::searchRegExp() const
 {
-	QRegExp result( searchText() , 	matchCase() ? Qt::CaseSensitive : Qt::CaseInsensitive ,
-									matchRegExp() ? QRegExp::RegExp : QRegExp::FixedString );
-
-	return result;
+	return QRegExp( searchText() , caseSensitivity() , patternSyntax() );	
 }
 bool IncrementalSearchBar::highlightMatches()
 {
@@ -183,26 +180,26 @@ bool IncrementalSearchBar::highlightMatches()
         return _highlightBox->isChecked();
     }
 }
-bool IncrementalSearchBar::matchCase() const
+Qt::CaseSensitivity IncrementalSearchBar::caseSensitivity() const
 {
     if ( !_matchCaseBox )
     {
-        return false;
+        return Qt::CaseInsensitive;
     }
     else
     {
-        return _matchCaseBox->isChecked();
+        return _matchCaseBox->isChecked() ? Qt::CaseSensitive : Qt::CaseInsensitive;
     }
 }
-bool IncrementalSearchBar::matchRegExp() const
+QRegExp::PatternSyntax IncrementalSearchBar::patternSyntax() const
 {
     if ( !_matchRegExpBox )
     {
-        return false;
+        return QRegExp::FixedString;
     }
     else
     {
-        return _matchRegExpBox->isChecked();
+        return _matchRegExpBox->isChecked() ? QRegExp::RegExp : QRegExp::FixedString;
     }
 }
 bool IncrementalSearchBar::filter() const
