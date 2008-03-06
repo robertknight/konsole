@@ -163,6 +163,13 @@ public:
 signals:
     /** Emitted when the text entered in the search box is altered */
     void searchChanged( const QString& text );
+	/** 
+	 * Emitted when the regular expression described by this search bar changes.
+	 * This can occur if the text in the search box changes or if the 'Match Case'
+	 * or 'Match Regular Expression' checkboxes are toggled.
+	 */
+	void searchRegExpChanged( const QRegExp& regExp );
+
     /** Emitted when the user clicks the button to find the next match */
     void findNextClicked();
     /** Emitted when the user clicks the button to find the previous match */
@@ -196,6 +203,7 @@ protected:
 
 private slots:
     void notifySearchChanged();
+	void updateRegExp();
 
 private:
     bool _foundMatch;
@@ -209,6 +217,8 @@ private:
     QProgressBar* _progress;
 
     QTimer* _searchTimer;
+
+	QRegExp _searchRegExp;
 };
 Q_DECLARE_OPERATORS_FOR_FLAGS(IncrementalSearchBar::Features)
 

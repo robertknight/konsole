@@ -74,7 +74,7 @@ IncrementalSearchBar::IncrementalSearchBar(Features features , QWidget* parent)
     _searchTimer->setInterval(250);
     _searchTimer->setSingleShot(true);
     connect( _searchTimer , SIGNAL(timeout()) , this , SLOT(notifySearchChanged()) );
-    connect( _searchEdit , SIGNAL(textChanged(const QString&)) , _searchTimer , SLOT(start()));
+    connect( _searchEdit , SIGNAL(textChanged(const QString&)) , this , SLOT(updateRegExp()));
 
     QToolButton* findNext = new QToolButton(this);
     findNext->setObjectName("find-next-button");
@@ -109,6 +109,7 @@ IncrementalSearchBar::IncrementalSearchBar(Features features , QWidget* parent)
         _matchCaseBox = new QCheckBox( i18n("Match case") , this );
         _matchCaseBox->setObjectName("match-case-box");
         _matchCaseBox->setToolTip( i18n("Sets whether the searching is case sensitive") );
+		connect( _matchCaseBox , SIGNAL(toggled(bool)) , this , SLOT(updateRegExp()) );
         connect( _matchCaseBox , SIGNAL(toggled(bool)) , this , SIGNAL(matchCaseToggled(bool)) );
     }
 
@@ -118,6 +119,7 @@ IncrementalSearchBar::IncrementalSearchBar(Features features , QWidget* parent)
         _matchRegExpBox->setObjectName("match-regexp-box");
         _matchRegExpBox->setToolTip( i18n("Sets whether the search phrase is interpreted as normal text or"
 					  " as a regular expression") );
+		connect( _matchRegExpBox , SIGNAL(toggled(bool)) , this , SLOT(updateRegExp()) );
         connect( _matchRegExpBox , SIGNAL(toggled(bool)) , this , SIGNAL(matchRegExpToggled(bool)) );
     }
 
@@ -160,6 +162,7 @@ IncrementalSearchBar::IncrementalSearchBar(Features features , QWidget* parent)
 void IncrementalSearchBar::notifySearchChanged()
 {
     emit searchChanged( searchText() );
+	emit searchRegExpChanged( _searchRegExp ); 
 }
 QString IncrementalSearchBar::searchText() const
 {
@@ -167,7 +170,7 @@ QString IncrementalSearchBar::searchText() const
 }
 QRegExp IncrementalSearchBar::searchRegExp() const
 {
-	return QRegExp( searchText() , caseSensitivity() , patternSyntax() );	
+	return _searchRegExp; 
 }
 bool IncrementalSearchBar::highlightMatches()
 {
@@ -275,6 +278,14 @@ void IncrementalSearchBar::setContinueFlag( Continue flag )
     {
         _continueLabel->hide();
     }
+}
+void IncrementalSearchBar::updateRegExp()
+{
+	_searchRegExp.setPattern(searchText());
+	_searchRegExp.setCaseSensitivity(caseSensitivity());
+	_searchRegExp.setPatternSyntax(patternSyntax());
+
+	_searchTimer->start();
 }
 
 #include "IncrementalSearchBar.moc"
