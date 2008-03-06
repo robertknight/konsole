@@ -89,7 +89,12 @@ public:
 							int count,
 							LineProperty properties);	
 
-    
+	/** 
+	 * Decode a character buffer directly into a string.  @p text
+	 * must have at least @p size characters.
+	 */
+   	static void decode(QString& text, const Character* buffer, int size);
+
 private:
     QTextStream* _output;
     bool _includeTrailingWhitespace;

@@ -496,10 +496,9 @@ void ScreenWindow::createFilterFolds(const QString& filter)
 	for (int i=0;i<count;i++)
 	{
 		_screen->getImage(buffer,columns,i,i);
-	
-		for (int j=0 ; j < columns ; j++)
-			lineText[j] = QChar(buffer[j].character);
 
+		PlainTextDecoder::decode(lineText,buffer,columns);
+		
 		//qDebug() << "Looking for" << filter << "in" << lineText.simplified();
 		bool match = lineText.contains(filter);
 
