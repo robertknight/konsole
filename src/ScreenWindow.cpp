@@ -273,16 +273,9 @@ QPoint ScreenWindow::cursorPosition() const
     
 	int cursorLine = _screen->getHistLines() + _screen->getCursorY();
 	int visibleCursorLine = _folds.mapToVisibleLine(cursorLine,true);
-	int visibleCurrentLine = _folds.mapToVisibleLine(currentLine(),true);
-
-	Q_ASSERT(visibleCursorLine != -1);
-	Q_ASSERT(visibleCurrentLine != -1);
-
-	//if (visibleCursorLine == -1)
-	//	return QPoint(0,0);
 
     position.setX( _screen->getCursorX() );
-    position.setY( visibleCursorLine - visibleCurrentLine );
+    position.setY( visibleCursorLine - currentLine() );
 
     return position; 
 }
