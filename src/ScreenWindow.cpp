@@ -104,8 +104,6 @@ void ScreenWindow::getFilteredImage(Character* buffer,int size,int startLine,int
 
 Character* ScreenWindow::getImage()
 {
-	createFilterFolds("robert");
-
 	// reallocate internal buffer if the window size has changed
 	int size = windowLines() * windowColumns();
 	if (_windowBuffer == 0 || _windowBufferSize != size) 
