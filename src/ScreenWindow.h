@@ -266,7 +266,6 @@ public:
 	// TODO: The fold commands take line arguments in 'Screen' coordinates
 	// whereas the other commands in ScreenWindow take line arguments in
 	// window coordinates and convert to 'Screen' coordinates
-	void createFilterFolds(const QString& filter);
 	
 public slots:
     /** 
@@ -275,6 +274,8 @@ public slots:
      * the outputChanged() signal to be emitted.
      */
     void notifyOutputChanged();
+
+	void setFilter(const QString& filter);
 
 signals:
     /**
@@ -300,9 +301,8 @@ private:
 	void fillUnusedArea();
 	int mapToScreen(int line) const;
 
-	void updateFilter();
 	void getFilteredImage(Character* buffer,int size,int startLine,int endLine);
-	void updateFilterDataSize();
+	void createFilterFolds(const QString& filter);
 
     Screen* _screen; // see setScreen() , screen()
 	Character* _windowBuffer;
@@ -315,7 +315,8 @@ private:
     int  _scrollCount; // count of lines which the window has been scrolled by since
                        // the last call to resetScrollCount()
 
-	Folds _folds;	
+	Folds _folds;
+	QString _filter;
 };
 
 

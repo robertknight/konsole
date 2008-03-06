@@ -104,6 +104,12 @@ void ScreenWindow::getFilteredImage(Character* buffer,int size,int startLine,int
 
 Character* ScreenWindow::getImage()
 {
+	// update filter if necessary
+	if (!_filter.isEmpty() && _bufferNeedsUpdate)
+	{
+		createFilterFolds(_filter);
+	}
+
 	// reallocate internal buffer if the window size has changed
 	int size = windowLines() * windowColumns();
 	if (_windowBuffer == 0 || _windowBufferSize != size) 
@@ -363,6 +369,18 @@ void ScreenWindow::notifyOutputChanged()
 	_bufferNeedsUpdate = true;
 
     emit outputChanged(); 
+}
+void ScreenWindow::setFilter(const QString& filter)
+{
+	_filter = filter;
+	_bufferNeedsUpdate = true;
+
+	// when the filter is non-empty the filter folds will be updated
+	// when getImage() is called
+	if (filter.isEmpty())
+		createFilterFolds(filter);
+
+	emit outputChanged();
 }
 void ScreenWindow::createFilterFolds(const QString& filter)
 {
