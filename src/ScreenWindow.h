@@ -35,6 +35,50 @@ namespace Konsole
 
 class Screen;
 
+class Folds
+{
+public:
+	void setFold(int screenStartLine,int screenEndLine, bool open);
+	void removeAll();
+	enum Type
+	{
+		FoldNone,
+		FoldStart,
+		FoldEnd
+	};
+	Type type(int screenLine) const;
+	bool isOpen(int screenLine) const;
+	void setOpen(int screenLine,bool open);
+	int count() const;
+	void setLineCount(int count);
+
+	void updateVisibleLines();
+	bool isLineVisible(int line) const;
+	int visibleLineCount() const;
+
+private:
+
+	bool _enabled;
+	QBitArray _foldStarts;
+	QBitArray _foldEnds;
+	QBitArray _expanded;
+	QBitArray _filteredLines;
+	int _visibleLines;
+};
+
+inline bool Folds::isLineVisible(int line) const
+{
+	return _filteredLines.testBit(line);
+}
+inline int Folds::visibleLineCount() const
+{
+	return _enabled ? _visibleLines : _filteredLines.count();
+}
+inline int Folds::count() const
+{
+	return _enabled ? _foldStarts.count(true) : 0;
+}
+
 /**
  * Provides a window onto a section of a terminal screen.
  * This window can then be rendered by a terminal display widget ( TerminalDisplay ).
@@ -222,20 +266,8 @@ public:
 	// TODO: The fold commands take line arguments in 'Screen' coordinates
 	// whereas the other commands in ScreenWindow take line arguments in
 	// window coordinates and convert to 'Screen' coordinates
-	void setFold(int screenStartLine,int screenEndLine,bool fold);
-	enum FoldType
-	{
-		FoldNone,
-		FoldStart,
-		FoldEnd
-	};
-	FoldType foldType(int screenLine) const;
-	bool isFoldOpen(int screenLine) const;
-	void setFoldOpen(int screenLine,bool open);
-	void removeAllFolds();
 	void createFilterFolds(const QString& filter);
-	int foldCount() const;
-
+	
 public slots:
     /** 
      * Notifies the window that the contents of the associated terminal screen have changed.
@@ -283,17 +315,10 @@ private:
     int  _scrollCount; // count of lines which the window has been scrolled by since
                        // the last call to resetScrollCount()
 
-	struct FilterData
-	{
-		bool enabled;
-		QBitArray foldStarts;
-		QBitArray foldEnds;
-		QBitArray expanded;
-		QBitArray filteredLines;
-		int visibleLines;
-	};
-	FilterData _filterData;
+	Folds _folds;	
 };
+
+
 
 }
 #endif // SCREENWINDOW_H

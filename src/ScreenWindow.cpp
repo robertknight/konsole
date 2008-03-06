@@ -40,8 +40,6 @@ ScreenWindow::ScreenWindow(QObject* parent)
     , _trackOutput(true)
     , _scrollCount(0)
 {
-	_filterData.enabled = true;
-	_filterData.visibleLines = 0;
 }
 ScreenWindow::~ScreenWindow()
 {
@@ -59,110 +57,13 @@ Screen* ScreenWindow::screen() const
     return _screen;
 }
 
-ScreenWindow::FoldType ScreenWindow::foldType(int line) const
-{
-	if (!_filterData.enabled)
-		return FoldNone;
-
-	const int screenLine = line;
-	
-	if (_filterData.foldStarts.testBit(screenLine))
-		return FoldStart;
-	else if (_filterData.foldEnds.testBit(screenLine))
-		return FoldEnd;
-	else
-		return FoldNone;
-}
-bool ScreenWindow::isFoldOpen(int line) const
-{
-	Q_ASSERT(foldType(line) == FoldStart);
-
-	return _filterData.expanded.testBit(line);
-}
-void ScreenWindow::setFoldOpen(int line,bool open)
-{
-	Q_ASSERT(foldType(line) == FoldStart);
-	
-	updateFilterDataSize();
-
-	_filterData.expanded.setBit(line,open);
-}
-void ScreenWindow::setFold(int startLine,int endLine,bool fold)
-{
-	Q_ASSERT(startLine <= endLine);
-	
-	_filterData.enabled = true;
-
-	updateFilterDataSize();
-
-	// check that fold status makes sense
-	Q_ASSERT(_filterData.foldStarts.testBit(startLine) ==
-			 _filterData.foldEnds.testBit(endLine));	
-
-	//qDebug() << (fold ? "Creating fold" : "Removing fold") << "from line" << startLine << "to" << endLine; 
-
-	_filterData.foldStarts.setBit(startLine,fold);
-	_filterData.foldEnds.setBit(endLine,fold);
-	_filterData.expanded.setBit(startLine,false);
-
-}
-void ScreenWindow::removeAllFolds()
-{
-	_filterData.foldStarts.fill(false);
-	_filterData.foldEnds.fill(false);
-	_filterData.filteredLines.fill(true);
-	_filterData.expanded.fill(false);
-
-	_filterData.enabled = false;
-}
-void ScreenWindow::updateFilter()
-{
-	updateFilterDataSize();
-
-	int count = lineCount();
-
-	// mark all lines as visible
-	_filterData.filteredLines.fill(true);
-
-	// stores status of folds covering current line
-	// contains 'true' for open folds, 'false' for closed folds
-	QStack<bool> foldStack;
-
-	bool stackHasClosedFold = false;
-
-	for (int i=0;i<count;i++)
-	{
-		_filterData.filteredLines[i] = !stackHasClosedFold;
-		
-		if (_filterData.foldStarts.testBit(i))
-		{
-			bool open = _filterData.expanded.testBit(i);
-			foldStack.push(open);
-			if (!open)
-				stackHasClosedFold = true;
-		}
-
-		if (_filterData.foldEnds.testBit(i))
-		{
-			foldStack.pop();
-			stackHasClosedFold = foldStack.contains(false);
-		}
-	}
-
-	// check that count of start/end folds are the same
-	Q_ASSERT(foldStack.isEmpty());
-
-	_filterData.visibleLines = _filterData.filteredLines.count(true);
-}
-
 void ScreenWindow::getFilteredImage(Character* buffer,int size,int startLine,int endLine)
 {
-	//qDebug() << "Filtered image from" << startLine << "to" << endLine;
-
 	Q_ASSERT( startLine <= endLine );
 	Q_ASSERT( size >= (startLine-endLine+1)*windowColumns() );
 
-	updateFilter();
+	_folds.setLineCount(lineCount());
+	_folds.updateVisibleLines();
 
 	// find first line to copy
 	int startFrom = 0;
@@ -170,7 +71,7 @@ void ScreenWindow::getFilteredImage(Character* buffer,int size,int startLine,int
 	int cursorLine = _screen->getHistLines() + _screen->getCursorY();
 	for (int i=0;i<lineCount();i++)
 	{
-		if (_filterData.filteredLines[i] || i == cursorLine)
+		if (_folds.isLineVisible(i) || i == cursorLine)
 			visibleLineCount++;
 
 		if (visibleLineCount > startLine)
@@ -185,17 +86,8 @@ void ScreenWindow::getFilteredImage(Character* buffer,int size,int startLine,int
 	int count = 0;
 	for (int i=startFrom ; count < (endLine-startLine+1) && i < lineCount() ; i++)
 	{
-		if (_filterData.filteredLines[i] || i == cursorLine)
+		if (_folds.isLineVisible(i) || i == cursorLine)
 		{
-			Character cbuffer[windowColumns()];
-			_screen->getImage(cbuffer,windowColumns(),i,i);
-			QString text;
-			for (int j=0;j<windowColumns();j++)
-				text[j] = cbuffer[j].character;
-
-			//qDebug() << "Showing line" << i << text.simplified() <<
-			//"is filtered" << _filterData.filteredLines[i];
-
 			_screen->getImage(buffer + (windowColumns()*count), windowColumns() ,i,i);
 			visibleLineCount++;
 			count++;
@@ -212,6 +104,8 @@ void ScreenWindow::getFilteredImage(Character* buffer,int size,int startLine,int
 
 Character* ScreenWindow::getImage()
 {
+	createFilterFolds("robert");
+
 	// reallocate internal buffer if the window size has changed
 	int size = windowLines() * windowColumns();
 	if (_windowBuffer == 0 || _windowBufferSize != size) 
@@ -227,7 +121,7 @@ Character* ScreenWindow::getImage()
 
 	// iterate through lines and copy visible ones if filters are enabled,
 	// otherwise fill the whole window buffer from the screen in one call
-	if (_filterData.enabled)
+	if (_folds.count() > 0)
 	{
 		getFilteredImage(_windowBuffer,size,
 						  currentLine(),endWindowLine());
@@ -341,8 +235,8 @@ int ScreenWindow::windowColumns() const
 }
 int ScreenWindow::visibleLineCount() const
 {
-	if (_filterData.enabled)
-		return _filterData.visibleLines;
+	if (_folds.count() > 0)
+		return _folds.visibleLineCount(); 
 	else
 		return lineCount();
 }
@@ -350,19 +244,14 @@ int ScreenWindow::lineCount() const
 {
     return _screen->getHistLines() + _screen->getLines();
 }
-void ScreenWindow::updateFilterDataSize()
+void Folds::setLineCount(int size)
 {
-	if (!_filterData.enabled)
-		return;
-
-	int size = lineCount();
-
-	if (_filterData.foldStarts.size() != size)
+	if (_foldStarts.size() != size)
 	{
-		_filterData.foldStarts.resize(size);
-		_filterData.foldEnds.resize(size);
-		_filterData.filteredLines.fill(true,size);
-		_filterData.expanded.resize(size);
+		_foldStarts.resize(size);
+		_foldEnds.resize(size);
+		_filteredLines.fill(true,size);
+		_expanded.resize(size);
 	}
 }
 int ScreenWindow::columnCount() const
@@ -479,8 +368,9 @@ void ScreenWindow::notifyOutputChanged()
 }
 void ScreenWindow::createFilterFolds(const QString& filter)
 {
-	removeAllFolds();
-
+	_folds.setLineCount(lineCount());
+	_folds.removeAll();
+	
 	if (filter.isEmpty())
 		return;
 
@@ -498,30 +388,104 @@ void ScreenWindow::createFilterFolds(const QString& filter)
 		_screen->getImage(buffer,columns,i,i);
 
 		PlainTextDecoder::decode(lineText,buffer,columns);
-		
-		//qDebug() << "Looking for" << filter << "in" << lineText.simplified();
 		bool match = lineText.contains(filter);
-
-		//if (match)
-		//	qDebug() << "Match for line: '" << lineText.simplified() << "'";
-		
+				
 		if (match || i == firstLine || i == lastLine)
 		{
-			// create the fold for the previous match
 			if (i != firstLine)
-				setFold(foldStart,i-1,true);
+				_folds.setFold(foldStart,i-1,true);
 
 			// set the start for the next fold to the current line
 			foldStart = i;
 		}
 	}
 }
-int ScreenWindow::foldCount() const
+Folds::Type Folds::type(int line) const
 {
-	if (!_filterData.enabled)
-		return 0;
+	if (!_enabled)
+		return FoldNone;
+
+	const int screenLine = line;
+	
+	if (_foldStarts.testBit(screenLine))
+		return FoldStart;
+	else if (_foldEnds.testBit(screenLine))
+		return FoldEnd;
 	else
-		return _filterData.foldStarts.count(true);
+		return FoldNone;
+}
+bool Folds::isOpen(int line) const
+{
+	Q_ASSERT(type(line) == FoldStart);
+
+	return _expanded.testBit(line);
+}
+void Folds::setOpen(int line,bool open)
+{
+	Q_ASSERT(type(line) == FoldStart);
+	
+	_expanded.setBit(line,open);
+}
+void Folds::setFold(int startLine,int endLine,bool fold)
+{
+	Q_ASSERT(startLine <= endLine);
+	
+	_enabled = true;
+
+	// check that fold status makes sense
+	Q_ASSERT(_foldStarts.testBit(startLine) ==
+			 _foldEnds.testBit(endLine));	
+
+	_foldStarts.setBit(startLine,fold);
+	_foldEnds.setBit(endLine,fold);
+	_expanded.setBit(startLine,false);
+
+}
+void Folds::removeAll()
+{
+	_foldStarts.fill(false);
+	_foldEnds.fill(false);
+	_filteredLines.fill(true);
+	_expanded.fill(false);
+
+	_enabled = false;
+}
+void Folds::updateVisibleLines()
+{
+	int count = _filteredLines.count(); 
+
+	// mark all lines as visible
+	_filteredLines.fill(true);
+
+	// stores status of folds covering current line
+	// contains 'true' for open folds, 'false' for closed folds
+	QStack<bool> foldStack;
+
+	bool stackHasClosedFold = false;
+
+	for (int i=0;i<count;i++)
+	{
+		_filteredLines[i] = !stackHasClosedFold;
+		
+		if (_foldStarts.testBit(i))
+		{
+			bool open = _expanded.testBit(i);
+			foldStack.push(open);
+			if (!open)
+				stackHasClosedFold = true;
+		}
+
+		if (_foldEnds.testBit(i))
+		{
+			foldStack.pop();
+			stackHasClosedFold = foldStack.contains(false);
+		}
+	}
+
+	// check that count of start/end folds are the same
+	Q_ASSERT(foldStack.isEmpty());
+
+	_visibleLines = _filteredLines.count(true);
 }
 
 #include "ScreenWindow.moc"
