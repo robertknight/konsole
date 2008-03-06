@@ -91,7 +91,7 @@ public:
 	 * the number of hidden lines before it.
 	 *
 	 * @p visibleLine may be greater than the line count set with setLineCount(), in which
-	 * case any lines beyond the last line will be considered visible.
+	 * case the result will be the line count set with setLineCount()
 	 *
 	 * Performance is O(@p visibleLine)
 	 */
@@ -127,9 +127,9 @@ inline int Folds::mapToBufferLine(int visibleLine) const
 	{
 		int result = 0;
 		int visibleCount = 0;
-		while (visibleCount < visibleLine)
+		while (visibleCount < visibleLine && result < _filteredLines.count()-1)
 		{
-			visibleCount += (result < _filteredLines.count()) ? isLineVisible(result) : 1;
+			visibleCount += isLineVisible(result);
 			result++;
 		}
 		return result;
