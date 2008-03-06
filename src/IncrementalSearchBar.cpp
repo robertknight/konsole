@@ -100,6 +100,7 @@ IncrementalSearchBar::IncrementalSearchBar(Features features , QWidget* parent)
         _highlightBox->setObjectName("highlight-matches-box");
         _highlightBox->setToolTip( i18n("Sets whether matching text should be highlighted") );
         _highlightBox->setChecked(true);
+		_highlightBox->installEventFilter(this);
         connect( _highlightBox , SIGNAL(toggled(bool)) , this , 
                  SIGNAL(highlightMatchesToggled(bool)) );
     }
@@ -109,6 +110,7 @@ IncrementalSearchBar::IncrementalSearchBar(Features features , QWidget* parent)
         _matchCaseBox = new QCheckBox( i18n("Match case") , this );
         _matchCaseBox->setObjectName("match-case-box");
         _matchCaseBox->setToolTip( i18n("Sets whether the searching is case sensitive") );
+		_matchCaseBox->installEventFilter(this);
 		connect( _matchCaseBox , SIGNAL(toggled(bool)) , this , SLOT(updateRegExp()) );
         connect( _matchCaseBox , SIGNAL(toggled(bool)) , this , SIGNAL(matchCaseToggled(bool)) );
     }
@@ -119,6 +121,7 @@ IncrementalSearchBar::IncrementalSearchBar(Features features , QWidget* parent)
         _matchRegExpBox->setObjectName("match-regexp-box");
         _matchRegExpBox->setToolTip( i18n("Sets whether the search phrase is interpreted as normal text or"
 					  " as a regular expression") );
+		_matchRegExpBox->installEventFilter(this);
 		connect( _matchRegExpBox , SIGNAL(toggled(bool)) , this , SLOT(updateRegExp()) );
         connect( _matchRegExpBox , SIGNAL(toggled(bool)) , this , SIGNAL(matchRegExpToggled(bool)) );
     }
@@ -128,6 +131,7 @@ IncrementalSearchBar::IncrementalSearchBar(Features features , QWidget* parent)
 		_filterBox = new QCheckBox(i18n("Filter"),this);
 		_filterBox->setObjectName("filter-box");
 		_filterBox->setToolTip(i18n("Filter output to show only lines matching the search phrase"));
+		_filterBox->installEventFilter(this);
 		connect( _filterBox , SIGNAL(toggled(bool)) , this , SIGNAL(filterToggled(bool)) );
 	}
 
@@ -214,19 +218,16 @@ bool IncrementalSearchBar::filter() const
 }
 bool IncrementalSearchBar::eventFilter(QObject* watched , QEvent* event)
 {
-    if ( watched == _searchEdit )
-    {
-        if ( event->type() == QEvent::KeyPress )
-        {
-            QKeyEvent* keyEvent = static_cast<QKeyEvent*>(event);
+     if ( event->type() == QEvent::KeyPress )
+     {
+         QKeyEvent* keyEvent = static_cast<QKeyEvent*>(event);
 
-            if ( keyEvent->key() == Qt::Key_Escape )
-            {
-                emit closeClicked();
-                return true;
-            }
-        }        
-    }
+         if ( keyEvent->key() == Qt::Key_Escape )
+         {
+             emit closeClicked();
+             return true;
+         }
+     }        
         
     return QWidget::eventFilter(watched,event);
 }
