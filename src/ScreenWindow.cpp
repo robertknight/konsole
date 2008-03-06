@@ -524,6 +524,8 @@ int Folds::mapToVisibleLine(int bufferLine,bool assumeVisible) const
 {
 	if (!_enabled)
 		return bufferLine;
+	else if (bufferLine >= _filteredLines.count())
+		return visibleLineCount();
 	else if (!_filteredLines.testBit(bufferLine) && !assumeVisible)
 		return -1; 
 	else

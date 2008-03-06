@@ -106,6 +106,9 @@ public:
 	 * even if it is actually hidden, in which case the result will be the count
 	 * of visible lines before @p bufferLine
 	 *
+	 * @p bufferLine may be greater than the line count set with setLineCount(), in which
+	 * case the result will be visibleLineCount()
+	 *
 	 * Performance is O(@p bufferLine)
 	 */
 	int mapToVisibleLine(int bufferLine , bool assumeVisible) const;
