@@ -308,6 +308,9 @@ public slots:
 	 * Lines whoose text matches @p pattern will remain visible, other lines will
 	 * be hidden.  If @p pattern is empty the filter will be removed and all lines 
 	 * will be shown.
+	 *
+	 * In addition to lines matching the filter, the line containing the cursor will
+	 * always be shown.
 	 */
 	void setFilter(const QRegExp& pattern);
 
