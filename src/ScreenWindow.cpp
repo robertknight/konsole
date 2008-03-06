@@ -401,12 +401,16 @@ void ScreenWindow::setFilter(const QRegExp& filter)
 void ScreenWindow::createFilterFolds(const QRegExp& filter)
 {
 	_filterNeedsUpdate = false;
-	_folds.setLineCount(lineCount());
 	_folds.removeAll();
 	
 	if (filter.isEmpty())
+	{
+		_folds.setLineCount(0);
 		return;
+	}	
 
+	_folds.setLineCount(lineCount());
+	
 	const int count = lineCount();
 	const int lastLine = count - 1;
 	const int firstLine = 0;
