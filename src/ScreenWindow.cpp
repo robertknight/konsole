@@ -393,10 +393,10 @@ void ScreenWindow::setFilter(const QRegExp& filter)
 	{	
 		createFilterFolds(filter);
 		_folds.updateVisibleLines();
-		notifyOutputChanged();
+		_currentLine = qMax(0,visibleLineCount() - windowLines());
 	}
-	else
-		emit outputChanged();
+		
+	emit outputChanged();
 }
 void ScreenWindow::createFilterFolds(const QRegExp& filter)
 {
