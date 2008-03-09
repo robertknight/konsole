@@ -96,7 +96,7 @@ public:
 	 * @p visibleLine may be greater than the line count set with setLineCount(), in which
 	 * case the result will be the line count set with setLineCount()
 	 *
-	 * Performance is O(@p visibleLine)
+	 * Performance is O(n), where n is @p visibleLine
 	 */
 	int mapToBufferLine(int visibleLine) const;
 
@@ -112,7 +112,7 @@ public:
 	 * @p bufferLine may be greater than the line count set with setLineCount(), in which
 	 * case the result will be visibleLineCount()
 	 *
-	 * Performance is O(@p bufferLine)
+	 * Performance is O(n), where n is @p bufferLine
 	 */
 	int mapToVisibleLine(int bufferLine , bool assumeVisible) const;
 
