@@ -171,8 +171,11 @@ public:
      */
     bool atEndOfOutput() const;
 
-    /** Scrolls the window so that @p line is at the top of the window */
-    void scrollTo( int line );
+    /** 
+	 * Scrolls the window so that @p line is at the top of the window and
+	 * @p column is at the left edge of the window. 
+	 */
+    void scrollTo( int line , int column );
 
     enum RelativeScrollMode
     {
@@ -230,8 +233,9 @@ signals:
      * Emitted when the screen window is scrolled to a different position.
      * 
      * @param line The line which is now at the top of the window.
+	 * @param column The column which is now at the left edge of the window.
      */
-    void scrolled(int line);
+    void scrolled(int line , int column);
 
     /**
      * Emitted when the selection is changed.
@@ -240,7 +244,10 @@ signals:
 
 private:
 	int endWindowLine() const;
+	int endWindowColumn() const;
 	void fillUnusedArea();
+	void scrollToLine(int line);
+	void scrollToColumn(int column);
 
     Screen* _screen; // see setScreen() , screen()
 	Character* _windowBuffer;

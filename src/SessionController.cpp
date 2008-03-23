@@ -366,7 +366,7 @@ bool SessionController::eventFilter(QObject* watched , QEvent* event)
         {
             if ( _view->screenWindow() && !_viewUrlFilter )
             {
-                connect( _view->screenWindow() , SIGNAL(scrolled(int)) , this ,
+                connect( _view->screenWindow() , SIGNAL(scrolled(int,int)) , this ,
                         SLOT(requireUrlFilterUpdate()) );
                 connect( _view->screenWindow() , SIGNAL(outputChanged()) , this ,
                          SLOT(requireUrlFilterUpdate()) );
@@ -753,7 +753,7 @@ void SessionController::listenForScreenWindowUpdates()
 
 	connect( _view->screenWindow() , SIGNAL(outputChanged()) , this , 
 			SLOT(updateSearchFilter()) );
-	connect( _view->screenWindow() , SIGNAL(scrolled(int)) , this , 
+	connect( _view->screenWindow() , SIGNAL(scrolled(int,int)) , this , 
 			SLOT(updateSearchFilter()) );
 
 	_listenForScreenWindowUpdates = true;
@@ -1394,7 +1394,7 @@ void SearchHistoryTask::highlightResult(ScreenWindowPtr window , int findPos)
      kDebug(1211) << "Found result at line " << findPos;
 
      //update display to show area of history containing selection
-     window->scrollTo(findPos);
+     window->scrollTo(findPos,window->currentColumn());
      window->setSelectionStart( 0 , findPos - window->currentLine() , false );
      window->setSelectionEnd( window->columnCount() , findPos - window->currentLine() );
      //kDebug() << "Current line " << window->currentLine();

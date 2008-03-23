@@ -567,7 +567,7 @@ protected:
 
 protected slots:
 
-    void scrollBarPositionChanged(int value);
+    void scrollBarPositionChanged();
     void blinkEvent();
     void blinkCursorEvent();
     

@@ -317,9 +317,7 @@ TerminalDisplay::TerminalDisplay(QWidget *parent)
   setScroll(0,0,0,0); 
   _scrollBar->setCursor( Qt::ArrowCursor );
   _horizontalScrollBar->setCursor( Qt::ArrowCursor );
-  connect(_scrollBar, SIGNAL(valueChanged(int)), this, 
-  					  SLOT(scrollBarPositionChanged(int)));
-  
+    
   // setup timers for blinking cursor and text
   _blinkTimer   = new QTimer(this);
   connect(_blinkTimer, SIGNAL(timeout()), this, SLOT(blinkEvent()));
@@ -897,8 +895,8 @@ void TerminalDisplay::updateImage()
 
   setScroll( _screenWindow->currentLine() , 
   			 _screenWindow->lineCount() , 
-			 0 , 
-			 _screenWindow->windowColumns() );
+			 _screenWindow->currentColumn() , 
+			 _screenWindow->columnCount() );
 
   if (!_image)
      updateImageSize(); // Create _image
@@ -1523,12 +1521,12 @@ void TerminalDisplay::hideEvent(QHideEvent*)
 /*                                                                           */
 /* ------------------------------------------------------------------------- */
 
-void TerminalDisplay::scrollBarPositionChanged(int)
+void TerminalDisplay::scrollBarPositionChanged()
 {
   if ( !_screenWindow ) 
       return;
 
-  _screenWindow->scrollTo( _scrollBar->value() );
+  _screenWindow->scrollTo( _scrollBar->value() , _horizontalScrollBar->value() );
 
   // if the thumb has been moved to the bottom of the _scrollBar then set
   // the display to automatically track new output, 
@@ -1558,24 +1556,29 @@ void TerminalDisplay::setScroll(int verticalCursor, int lines,
   // a repaint, so it should be avoided if it is not necessary
   
 
+  static const char* valueChangedSignal = SIGNAL(valueChanged(int));
+  static const char* scrollBarValueSlot = SLOT(scrollBarPositionChanged());
+
   // Update vertical scroll bar
   if (!verticalScrollUnchanged)
   {
-  	disconnect(_scrollBar, SIGNAL(valueChanged(int)), this, SLOT(scrollBarPositionChanged(int)));
+  	disconnect(_scrollBar,valueChangedSignal, this, scrollBarValueSlot); 
   	_scrollBar->setRange(0,lines - _lines);
   	_scrollBar->setSingleStep(1);
   	_scrollBar->setPageStep(_lines);
   	_scrollBar->setValue(verticalCursor);
-  	connect(_scrollBar, SIGNAL(valueChanged(int)), this, SLOT(scrollBarPositionChanged(int)));
+  	connect(_scrollBar,valueChangedSignal,this,scrollBarValueSlot);
   }
 	
   // Update horizontal scroll bar
   if (!horizontalScrollUnchanged)
   {
+	disconnect( _horizontalScrollBar,valueChangedSignal,this,scrollBarValueSlot); 
   	_horizontalScrollBar->setRange(0,columns - _columns);
   	_horizontalScrollBar->setSingleStep(1);
   	_horizontalScrollBar->setPageStep(_columns);
   	_horizontalScrollBar->setValue(horizontalCursor);
+	connect( _horizontalScrollBar , valueChangedSignal,this,scrollBarValueSlot);
   }
 }
 

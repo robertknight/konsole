@@ -73,7 +73,8 @@ Character* ScreenWindow::getImage()
 		return _windowBuffer;
  
 	_screen->getImage(_windowBuffer,size,
-					  currentLine(),endWindowLine());
+					  currentLine(),endWindowLine(),
+					  currentColumn(),endWindowColumn());
 
 	// this window may look beyond the end of the screen, in which 
 	// case there will be an unused area which needs to be filled
@@ -106,6 +107,11 @@ int ScreenWindow::endWindowLine() const
 {
 	return qMin(currentLine() + windowLines() - 1,
 				lineCount() - 1);
+}
+int ScreenWindow::endWindowColumn() const 
+{
+	return qMin(currentColumn() + windowColumns() - 1,
+				columnCount() - 1);
 }
 QVector<LineProperty> ScreenWindow::getLineProperties()
 {
@@ -212,11 +218,11 @@ void ScreenWindow::scrollBy( RelativeScrollMode mode , int amount )
 {
     if ( mode == ScrollLines )
     {
-        scrollTo( currentLine() + amount );
+        scrollTo( currentLine() + amount , _currentColumn );
     }
     else if ( mode == ScrollPages )
     {
-        scrollTo( currentLine() + amount * ( windowLines() / 2 ) ); 
+        scrollTo( currentLine() + amount * ( windowLines() / 2 ) , _currentColumn ); 
     }
 }
 
@@ -225,7 +231,7 @@ bool ScreenWindow::atEndOfOutput() const
     return currentLine() == (lineCount()-windowLines());
 }
 
-void ScreenWindow::scrollTo( int line )
+void ScreenWindow::scrollToLine(int line)
 {
 	int maxCurrentLineNumber = lineCount() - windowLines();
 	line = qBound(0,line,maxCurrentLineNumber);
@@ -238,8 +244,21 @@ void ScreenWindow::scrollTo( int line )
     _scrollCount += delta;
 
 	_bufferNeedsUpdate = true;
+}
+void ScreenWindow::scrollTo( int line , int column )
+{
+	scrollToLine(line);
+	scrollToColumn(column);
+    
+	emit scrolled(_currentLine,_currentColumn);
+}
+void ScreenWindow::scrollToColumn( int column )
+{
+	int maxCurrentColumnNumber = columnCount() - windowColumns();
+	column = qBound(0,column,maxCurrentColumnNumber);
 
-    emit scrolled(_currentLine);
+	_currentColumn = column;
+	_bufferNeedsUpdate = true;
 }
 
 void ScreenWindow::setTrackOutput(bool trackOutput)

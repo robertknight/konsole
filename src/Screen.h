@@ -364,8 +364,12 @@ public:
      * @param size Size of @p dest in Characters
      * @param startLine Index of first line to copy
      * @param endLine Index of last line to copy
+	 * @param startColumn Index of first column to copy
+	 * @param endColumn Index of last column to copy
      */
-    void getImage( Character* dest , int size , int startLine , int endLine ) const;
+    void getImage( Character* dest , int size , 
+				   int startLine , int endLine,
+				   int startColumn , int endColumn ) const;
 
     /** 
      * Returns the additional attributes associated with lines in the image.
@@ -593,10 +597,12 @@ private:
 
 	// copies 'count' lines from the screen buffer into 'dest',
 	// starting from 'startLine', where 0 is the first line in the screen buffer
-	void copyFromScreen(Character* dest, int startLine, int count) const;
+	void copyFromScreen(Character* dest, int startLine, int lineCount,
+						int startColumn, int columnCount) const;
 	// copies 'count' lines from the history buffer into 'dest',
 	// starting from 'startLine', where 0 is the first line in the history
-	void copyFromHistory(Character* dest, int startLine, int count) const;
+	void copyFromHistory(Character* dest, int startLine, int lineCount,
+						 int startColumn, int columnCount) const;
 
 
     // screen image ----------------

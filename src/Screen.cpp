@@ -510,24 +510,27 @@ void Screen::effectiveRendition()
 
 */
 
-void Screen::copyFromHistory(Character* dest, int startLine, int count) const
+void Screen::copyFromHistory(Character* dest, int startLine, int lineCount,
+							 int startColumn, int columnCount) const
 {
-  Q_ASSERT( startLine >= 0 && count > 0 && startLine + count <= hist->getLines() );
+  Q_ASSERT( startLine >= 0 && lineCount > 0 && startLine + lineCount <= hist->getLines() );
 
-  for (int line = startLine; line < startLine + count; line++) 
+  for (int line = startLine; line < startLine + lineCount; line++) 
   {
-    const int length = qMin(columns,hist->getLineLen(line));
-    const int destLineOffset  = (line-startLine)*columns;
+    const int length = hist->getLineLen(line); 
+    const int destLineOffset  = (line-startLine)*columnCount;
+	
+	int copyCount = qBound(0,length-startColumn,columnCount);
+    
+	hist->getCells(line,startColumn,copyCount,dest + destLineOffset);
 
-    hist->getCells(line,0,length,dest + destLineOffset);
-
-    for (int column = length; column < columns; column++) 
+    for (int column = copyCount; column < columnCount; column++) 
 		dest[destLineOffset+column] = defaultChar;
     
 	// invert selected text
 	if (sel_begin !=-1)
 	{
-    	for (int column = 0; column < columns; column++)
+    	for (int column = 0; column < columnCount; column++)
     	{
         	if (isSelected(column,line)) 
 			{
@@ -538,51 +541,58 @@ void Screen::copyFromHistory(Character* dest, int startLine, int count) const
   }
 }
 
-void Screen::copyFromScreen(Character* dest , int startLine , int count) const
+void Screen::copyFromScreen(Character* dest , int startLine , int lineCount, 
+							int startColumn, int columnCount) const
 {
-	Q_ASSERT( startLine >= 0 && count > 0 && startLine + count <= lines );
+	Q_ASSERT( startLine >= 0 && lineCount > 0 && startLine + lineCount <= lines );
 
-    for (int line = startLine; line < (startLine+count) ; line++)
+	int endColumn = startColumn + columnCount - 1;
+
+    for (int line = startLine; line < (startLine+lineCount) ; line++)
     {
        int srcLineStartIndex  = line*columns;
-	   int destLineStartIndex = (line-startLine)*columns;
+	   int destLineStartIndex = (line-startLine)*columnCount;
 
-       for (int column = 0; column < columns; column++)
+       for (int column = startColumn; column <= endColumn; column++)
        { 
 		 int srcIndex = srcLineStartIndex + column; 
-		 int destIndex = destLineStartIndex + column;
+		 int destIndex = destLineStartIndex + (column-startColumn);
 
          dest[destIndex] = screenLines[srcIndex/columns].value(srcIndex%columns,defaultChar);
 
 	     // invert selected text
-         if (sel_begin != -1 && isSelected(column,line + hist->getLines()))
+         if (sel_begin != -1 && isSelected(column-startColumn,line + hist->getLines()))
            reverseRendition(dest[destIndex]); 
        }
 
     }
 }
 
-void Screen::getImage( Character* dest, int size, int startLine, int endLine ) const
+void Screen::getImage( 	Character* dest, int size, 
+						int startLine, int endLine,
+						int startColumn, int endColumn ) const
 {
   Q_ASSERT( startLine >= 0 ); 
   Q_ASSERT( endLine >= startLine && endLine < hist->getLines() + lines );
 
   const int mergedLines = endLine - startLine + 1;
+  const int mergedColumns = endColumn - startColumn + 1;
 
-  Q_ASSERT( size >= mergedLines * columns ); 
+  Q_ASSERT( size >= mergedLines * mergedColumns ); 
 
   const int linesInHistoryBuffer = qBound(0,hist->getLines()-startLine,mergedLines);
   const int linesInScreenBuffer = mergedLines - linesInHistoryBuffer;
 
   // copy lines from history buffer
   if (linesInHistoryBuffer > 0)
-  	copyFromHistory(dest,startLine,linesInHistoryBuffer); 
+  	copyFromHistory(dest,startLine,linesInHistoryBuffer,startColumn,mergedColumns); 
 
   // copy lines from screen buffer
   if (linesInScreenBuffer > 0)
-  	copyFromScreen(dest + linesInHistoryBuffer*columns,
+  	copyFromScreen(dest + linesInHistoryBuffer*mergedColumns,
 				   startLine + linesInHistoryBuffer - hist->getLines(),
-				   linesInScreenBuffer);
+				   linesInScreenBuffer,
+				   startColumn, mergedColumns);
  
   // invert display when in screen mode
   if (getMode(MODE_Screen))
@@ -592,8 +602,8 @@ void Screen::getImage( Character* dest, int size, int startLine, int endLine ) c
   }
 
   // mark the character at the current cursor position
-  int cursorIndex = loc(cuX, cuY + linesInHistoryBuffer);
-  if(getMode(MODE_Cursor) && cursorIndex < columns*mergedLines)
+  int cursorIndex = cuX + (cuY + linesInHistoryBuffer)*mergedColumns;
+  if(getMode(MODE_Cursor) && cursorIndex < mergedColumns*mergedLines)
     dest[cursorIndex].rendition |= RE_CURSOR;
 }
 
