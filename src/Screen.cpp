@@ -532,7 +532,7 @@ void Screen::copyFromHistory(Character* dest, int startLine, int lineCount,
 	{
     	for (int column = 0; column < columnCount; column++)
     	{
-        	if (isSelected(column,line)) 
+        	if (isSelected(column+startColumn,line)) 
 			{
           		reverseRendition(dest[destLineOffset + column]); 
     		}
@@ -561,7 +561,7 @@ void Screen::copyFromScreen(Character* dest , int startLine , int lineCount,
          dest[destIndex] = screenLines[srcIndex/columns].value(srcIndex%columns,defaultChar);
 
 	     // invert selected text
-         if (sel_begin != -1 && isSelected(column-startColumn,line + hist->getLines()))
+         if (sel_begin != -1 && isSelected(column,line + hist->getLines()))
            reverseRendition(dest[destIndex]); 
        }
 

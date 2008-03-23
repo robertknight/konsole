@@ -132,15 +132,18 @@ void ScreenWindow::getSelectionStart( int& column , int& line )
 {
     _screen->getSelectionStart(column,line);
     line -= currentLine();
+	column -= currentColumn();
 }
 void ScreenWindow::getSelectionEnd( int& column , int& line )
 {
     _screen->getSelectionEnd(column,line);
     line -= currentLine();
+	column -= currentColumn();
 }
 void ScreenWindow::setSelectionStart( int column , int line , bool columnMode )
 {
-    _screen->setSelectionStart( column , qMin(line + currentLine(),endWindowLine())  , columnMode);
+    _screen->setSelectionStart( column + currentColumn() , 
+					qMin(line + currentLine(),endWindowLine())  , columnMode);
 	
 	_bufferNeedsUpdate = true;
     emit selectionChanged();
@@ -148,7 +151,7 @@ void ScreenWindow::setSelectionStart( int column , int line , bool columnMode )
 
 void ScreenWindow::setSelectionEnd( int column , int line )
 {
-    _screen->setSelectionEnd( column , qMin(line + currentLine(),endWindowLine()) );
+    _screen->setSelectionEnd( column + currentColumn() , qMin(line + currentLine(),endWindowLine()) );
 
 	_bufferNeedsUpdate = true;
     emit selectionChanged();
@@ -156,7 +159,7 @@ void ScreenWindow::setSelectionEnd( int column , int line )
 
 bool ScreenWindow::isSelected( int column , int line )
 {
-    return _screen->isSelected( column , qMin(line + currentLine(),endWindowLine()) );
+    return _screen->isSelected( column + currentColumn() , qMin(line + currentLine(),endWindowLine()) );
 }
 
 void ScreenWindow::clearSelection()
