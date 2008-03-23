@@ -105,9 +105,8 @@ Session::Session() :
            this, SIGNAL( changeTabTextColorRequest( int ) ) );
     connect( _emulation, SIGNAL(profileChangeCommandReceived(const QString&)),
            this, SIGNAL( profileChangeCommandReceived(const QString&)) );
-    // TODO
-    // connect( _emulation,SIGNAL(imageSizeChanged(int,int)) , this ,
-    //        SLOT(onEmulationSizeChange(int,int)) );
+    connect( _emulation,SIGNAL(imageSizeChanged(int,int)) , this ,
+            SLOT(onEmulationSizeChange(int,int)) );
 
     //connect teletype to emulation backend
     _shellProcess->setUtf8Mode(_emulation->utf8());
@@ -528,9 +527,40 @@ void Session::onViewSizeChange(int /*height*/, int /*width*/)
 {
   updateTerminalSize();
 }
+void Session::setWrapEnabled(bool wrap)
+{
+	_emulation->setTextWrapEnabled(wrap);
+
+	if (wrap)
+	{
+		// update terminal size to reflect current views
+		updateTerminalSize();
+	}
+	else
+	{
+		// set the window size to a large value which can be considered infinite
+		// for most interactive programs.  
+		//
+		// ISSUE:  This will cause the ScreenWindow class to allocate much larger buffers
+		// than necessary to hold the screen image when copying from the Screen to the 
+		// TerminalDisplay.  The Screen / ScreenWindow classes need to be modified to only
+		// allocate memory for the size of the ScreenWindow
+		_emulation->setImageSize(_emulation->imageSize().height(),1024);
+	}
+}
+bool Session::wrapEnabled() const
+{
+	return _emulation->textWrapEnabled();
+}
 void Session::onEmulationSizeChange(int lines , int columns)
 {
-  setSize( QSize(lines,columns) );
+	QSize currentSize = _shellProcess->windowSize();
+
+	if (currentSize.height() != lines || currentSize.width() != columns)
+		_shellProcess->setWindowSize(lines,columns);
+
+	QSize newSize = _shellProcess->windowSize();
+	Q_ASSERT(newSize.height() == lines && newSize.width() == columns);
 }
 
 void Session::updateTerminalSize()
@@ -563,7 +593,6 @@ void Session::updateTerminalSize()
     if ( minLines > 0 && minColumns > 0 )
     {
         _emulation->setImageSize( minLines , minColumns );
-        _shellProcess->setWindowSize( minLines , minColumns );
     }
 }
 

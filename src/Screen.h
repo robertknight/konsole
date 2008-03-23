@@ -531,6 +531,18 @@ public:
      */
     void resetDroppedLines();
 
+	/**
+	 * Sets whether line wrapping is enabled if MODE_Wrap is on.
+	 * If line wrapping is disabled, attempts to add new characters at the 
+	 * end of a line will result in the image size being increased to accomodate
+	 * the new character.
+	 *
+	 * Line wrapping is enabled by default.
+	 */
+	void setWrapEnabled(bool enableWrap);
+	/** See setWrapEnabled() */
+	bool wrapEnabled() const;
+
 	/** 
  	 * Fills the buffer @p dest with @p count instances of the default (ie. blank)
  	 * Character style.
@@ -654,6 +666,8 @@ private:
 
     // modes
     ScreenParm saveParm;
+
+	bool disableWrap;
 
     static Character defaultChar;
 };

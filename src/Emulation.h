@@ -215,6 +215,15 @@ public:
    */
   bool programUsesMouse() const;
 
+  /** 
+   * Enables or disables line wrapping.  If line wrapping is enabled, 
+   * the emulation will not allow lines to become longer 
+   *
+   * By default, line wrapping is enabled.
+   */
+  virtual void setTextWrapEnabled(bool enable);
+  bool textWrapEnabled() const;
+
 public slots: 
 
   /** Change the size of the emulation's image */
@@ -453,6 +462,7 @@ private slots:
 private:
 
   bool _usesMouse;
+  bool _wrapEnabled;
   QTimer _bulkTimer1;
   QTimer _bulkTimer2;
   

@@ -348,6 +348,9 @@ public:
   void cancelZModem();
   bool isZModemBusy() { return _zmodemBusy; }
 
+  void setWrapEnabled(bool wrap);
+  bool wrapEnabled() const;
+
  /** 
    * Possible values of the @p what parameter for setUserTitle()
    * See "Operating System Controls" section on http://rtfm.etla.org/xterm/ctlseq.html

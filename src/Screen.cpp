@@ -81,7 +81,8 @@ Screen::Screen(int l, int c)
     ef_fg(CharacterColor()), ef_bg(CharacterColor()), ef_re(0),
     sa_cuX(0), sa_cuY(0),
     sa_cu_re(0),
-    lastPos(-1)
+    lastPos(-1),
+	disableWrap(false)
 {
   lineProperties.resize(lines+1);
   for (int i=0;i<lines+1;i++)
@@ -759,7 +760,9 @@ void Screen::ShowCharacter(unsigned short c)
      return;
 
   if (cuX+w > columns) {
-    if (getMode(MODE_Wrap)) {
+	if (disableWrap) 
+	  resizeImage(lines,cuX+w);
+    else if (getMode(MODE_Wrap)) {
       lineProperties[cuY] = (LineProperty)(lineProperties[cuY] | LINE_WRAPPED);
       NextLine();
     }
@@ -1574,3 +1577,9 @@ void Screen::fillWithDefaultChar(Character* dest, int count)
 	for (int i=0;i<count;i++)
 		dest[i] = defaultChar;
 }
+void Screen::setWrapEnabled(bool enable)
+{
+	disableWrap = !enable;
+}
+bool Screen::wrapEnabled() const { return !disableWrap; }
+

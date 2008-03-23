@@ -32,6 +32,7 @@
             <Action name="monitor-activity" group="session-view-operations" />
             <Separator group="session-view-operations"/>
             <Action name="character-encoding"  group="session-view-operations" />
+			<Action name="enable-word-wrap" group="session-view-operations" />
             <Action name="increase-text-size"  group="session-view-operations" />
             <Action name="decrease-text-size"  group="session-view-operations" />
         </Menu>

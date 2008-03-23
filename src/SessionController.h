@@ -166,6 +166,7 @@ private slots:
 	void pasteSelection(); // shortcut only
     void clear();
     void clearAndReset();
+	void setWrapEnabled(bool enabled);
     void editCurrentProfile();
     void changeCodec(QTextCodec* codec);
     //void searchHistory();

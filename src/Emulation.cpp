@@ -68,7 +68,8 @@ Emulation::Emulation() :
   _codec(0),
   _decoder(0),
   _keyTranslator(0),
-  _usesMouse(false)
+  _usesMouse(false),
+  _wrapEnabled(true)
 {
 
   // create screens with a default size
@@ -83,6 +84,15 @@ Emulation::Emulation() :
   connect( this , SIGNAL(programUsesMouseChanged(bool)) , 
            SLOT(usesMouseChanged(bool)) );
 }
+
+void Emulation::setTextWrapEnabled(bool enable) 
+{ 
+	_wrapEnabled = enable;
+
+	_screen[0]->setWrapEnabled(false);
+	_screen[1]->setWrapEnabled(false);
+}
+bool Emulation::textWrapEnabled() const { return _wrapEnabled; }
 
 bool Emulation::programUsesMouse() const
 {
@@ -431,6 +441,10 @@ void Emulation::setImageSize(int lines, int columns)
   //kDebug() << "Resizing image to: " << lines << "by" << columns << QTime::currentTime().msec();
   Q_ASSERT( lines > 0 );
   Q_ASSERT( columns > 0 );
+
+  // when text wrapping is enabled, the screen can only get wider
+  if (!_wrapEnabled) 
+	  columns = qMax(_screen[0]->getColumns(),columns);
 
   _screen[0]->resizeImage(lines,columns);
   _screen[1]->resizeImage(lines,columns);

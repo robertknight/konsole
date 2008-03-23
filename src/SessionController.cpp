@@ -479,6 +479,12 @@ void SessionController::setupActions()
     action->setShortcut( QKeySequence(Qt::CTRL+Qt::ALT+Qt::Key_S) );
     connect( action , SIGNAL(triggered()) , this , SLOT(renameSession()) );
 
+	// Enable text wrap
+	toggleAction = new KToggleAction(i18n("Enable Word Wrap"),this);
+	toggleAction->setChecked(true);
+	action = collection->addAction("enable-word-wrap",toggleAction);
+	connect(action,SIGNAL(toggled(bool)),this,SLOT(setWrapEnabled(bool))); 
+
     // Send to All
 
     //TODO - Complete the implementation of 'Send Input to All' for
@@ -584,6 +590,10 @@ void SessionController::setupActions()
     //action = collection->addAction("debug-process");
     //action->setText( "Get Foreground Process" );
     //connect( action , SIGNAL(triggered()) , this , SLOT(debugProcess()) );
+}
+void SessionController::setWrapEnabled(bool enabled)
+{
+	_session->setWrapEnabled(enabled);
 }
 void SessionController::changeProfile(Profile::Ptr profile)
 {
