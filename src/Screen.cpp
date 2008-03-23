@@ -602,8 +602,8 @@ void Screen::getImage( 	Character* dest, int size,
   }
 
   // mark the character at the current cursor position
-  int cursorIndex = cuX + (cuY + linesInHistoryBuffer)*mergedColumns;
-  if(getMode(MODE_Cursor) && cursorIndex < mergedColumns*mergedLines)
+  int cursorIndex = cuX-startColumn + (cuY + linesInHistoryBuffer)*mergedColumns;
+  if(getMode(MODE_Cursor) && cursorIndex < mergedColumns*mergedLines && cuX >= startColumn)
     dest[cursorIndex].rendition |= RE_CURSOR;
 }
 

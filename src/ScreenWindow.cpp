@@ -200,7 +200,7 @@ QPoint ScreenWindow::cursorPosition() const
 {
     QPoint position;
     
-    position.setX( _screen->getCursorX() );
+    position.setX( qMax(0,_screen->getCursorX()-currentColumn()) );
     position.setY( _screen->getCursorY() );
 
     return position; 
