@@ -34,7 +34,9 @@ ScreenWindow::ScreenWindow(QObject* parent)
 	, _windowBufferSize(0)
 	, _bufferNeedsUpdate(true)
 	, _windowLines(1)
+	, _windowColumns(1)
     , _currentLine(0)
+	, _currentColumn(0)
     , _trackOutput(true)
     , _scrollCount(0)
 {
@@ -163,6 +165,11 @@ void ScreenWindow::setWindowLines(int lines)
 	Q_ASSERT(lines > 0);
 	_windowLines = lines;
 }
+void ScreenWindow::setWindowColumns(int columns)
+{
+	Q_ASSERT(columns > 0);
+	_windowColumns = columns;
+}
 int ScreenWindow::windowLines() const
 {
 	return _windowLines;		
@@ -170,7 +177,7 @@ int ScreenWindow::windowLines() const
 
 int ScreenWindow::windowColumns() const
 {
-    return _screen->getColumns();
+    return _windowColumns;
 }
 
 int ScreenWindow::lineCount() const
@@ -197,7 +204,10 @@ int ScreenWindow::currentLine() const
 {
     return qBound(0,_currentLine,lineCount()-windowLines());
 }
-
+int ScreenWindow::currentColumn() const
+{
+	return qBound(0,_currentColumn,columnCount()-windowColumns());
+}
 void ScreenWindow::scrollBy( RelativeScrollMode mode , int amount )
 {
     if ( mode == ScrollLines )

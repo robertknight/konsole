@@ -111,10 +111,13 @@ public:
     /** 
      * Sets the current position and range of the display's scroll bar.
      *
-     * @param cursor The position of the scroll bar's thumb.
-     * @param lines The maximum value of the scroll bar.
+     * @param verticalCursor The position of the vertical scroll bar's thumb.
+     * @param lines The maximum value of the vertical scroll bar.
+	 * @param horizontalCursor The position of the horizontal scroll bar's thumb
+	 * @param columns The maximum value of the horizontal scroll bar.
      */
-    void setScroll(int cursor, int lines);
+    void setScroll(	int verticalCursor, int lines,
+					int horizontalCursor, int columns );
 
     /** 
      * Returns the display's filter chain.  When the image for the display is updated,
@@ -704,6 +707,8 @@ private:
 
     QClipboard*  _clipboard;
     QScrollBar* _scrollBar;
+	QScrollBar* _horizontalScrollBar;
+
     ScrollBarPosition _scrollbarLocation;
     QString     _wordCharacters;
     int         _bellMode;

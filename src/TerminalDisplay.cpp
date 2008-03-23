@@ -112,6 +112,7 @@ void TerminalDisplay::setScreenWindow(ScreenWindow* window)
         connect( _screenWindow , SIGNAL(outputChanged()) , this , SLOT(updateLineProperties()) );
         connect( _screenWindow , SIGNAL(outputChanged()) , this , SLOT(updateImage()) );
 		window->setWindowLines(_lines);
+		window->setWindowColumns(_columns);
     }
 }
 
@@ -128,6 +129,7 @@ void TerminalDisplay::setBackgroundColor(const QColor& color)
 
   	// Avoid propagating the palette change to the scroll bar 
   	_scrollBar->setPalette( QApplication::palette() );  
+	_horizontalScrollBar->setPalette( QApplication::palette() );
 
 	update();
 }
@@ -309,12 +311,15 @@ TerminalDisplay::TerminalDisplay(QWidget *parent)
 
   // create scroll bar for scrolling output up and down
   // set the scroll bar's slider to occupy the whole area of the scroll bar initially
-  _scrollBar = new QScrollBar(this);
-  setScroll(0,0); 
+  _scrollBar = new QScrollBar(Qt::Vertical,this);
+  _horizontalScrollBar = new QScrollBar(Qt::Horizontal,this);
+
+  setScroll(0,0,0,0); 
   _scrollBar->setCursor( Qt::ArrowCursor );
+  _horizontalScrollBar->setCursor( Qt::ArrowCursor );
   connect(_scrollBar, SIGNAL(valueChanged(int)), this, 
   					  SLOT(scrollBarPositionChanged(int)));
-
+  
   // setup timers for blinking cursor and text
   _blinkTimer   = new QTimer(this);
   connect(_blinkTimer, SIGNAL(timeout()), this, SLOT(blinkEvent()));
@@ -559,10 +564,15 @@ void TerminalDisplay::drawBackground(QPainter& painter, const QRect& rect, const
         // being outside of the terminal display and visual consistency with other KDE
         // applications.  
         //
-        QRect scrollBarArea = _scrollBar->isVisible() ? 
+        QRect verticalScrollBarArea = _scrollBar->isVisible() ? 
                                     rect.intersected(_scrollBar->geometry()) :
                                     QRect();
-        QRegion contentsRegion = QRegion(rect).subtracted(scrollBarArea);
+		QRect horizontalScrollBarArea = _horizontalScrollBar->isVisible() ? 
+									rect.intersected(_horizontalScrollBar->geometry()) : QRect();
+
+        QRegion contentsRegion = QRegion(rect)
+								.subtracted(verticalScrollBarArea)
+								.subtracted(horizontalScrollBarArea);
         QRect contentsRect = contentsRegion.boundingRect();
 
         if ( HAVE_TRANSPARENCY && qAlpha(_blendColor) < 0xff && useOpacitySetting ) 
@@ -578,7 +588,8 @@ void TerminalDisplay::drawBackground(QPainter& painter, const QRect& rect, const
         else
             painter.fillRect(contentsRect, backgroundColor);
 
-        painter.fillRect(scrollBarArea,_scrollBar->palette().background());
+        painter.fillRect(verticalScrollBarArea,_scrollBar->palette().background());
+		painter.fillRect(horizontalScrollBarArea,_horizontalScrollBar->palette().background());
 }
 
 void TerminalDisplay::drawCursor(QPainter& painter, 
@@ -884,7 +895,10 @@ void TerminalDisplay::updateImage()
   int lines = _screenWindow->windowLines();
   int columns = _screenWindow->windowColumns();
 
-  setScroll( _screenWindow->currentLine() , _screenWindow->lineCount() );
+  setScroll( _screenWindow->currentLine() , 
+  			 _screenWindow->lineCount() , 
+			 0 , 
+			 _screenWindow->windowColumns() );
 
   if (!_image)
      updateImageSize(); // Create _image
@@ -1472,7 +1486,10 @@ void TerminalDisplay::updateImageSize()
   }
 
   if (_screenWindow)
+  {
   	_screenWindow->setWindowLines(_lines);
+	_screenWindow->setWindowColumns(_columns);
+  }
 
   _resizing = (oldlin!=_lines) || (oldcol!=_columns);
 
@@ -1523,26 +1540,43 @@ void TerminalDisplay::scrollBarPositionChanged(int)
   updateImage();
 }
 
-void TerminalDisplay::setScroll(int cursor, int slines)
+void TerminalDisplay::setScroll(int verticalCursor, int lines,
+								int horizontalCursor, int columns)
 {
+  bool verticalScrollUnchanged = 	_scrollBar->minimum() == 0 &&
+  									_scrollBar->maximum() == (lines - _lines) &&
+									_scrollBar->value() == verticalCursor;
+
+  bool horizontalScrollUnchanged = _horizontalScrollBar->minimum() == 0 &&
+  								   _horizontalScrollBar->maximum() == (columns - _columns) &&
+								   _horizontalScrollBar->value() == horizontalCursor;
+
   // update _scrollBar if the range or value has changed,
   // otherwise return
   //
   // setting the range or value of a _scrollBar will always trigger
   // a repaint, so it should be avoided if it is not necessary
-  if ( _scrollBar->minimum() == 0                 &&
-       _scrollBar->maximum() == (slines - _lines) &&
-       _scrollBar->value()   == cursor )
-  {
-        return;
-  }
+  
 
-  disconnect(_scrollBar, SIGNAL(valueChanged(int)), this, SLOT(scrollBarPositionChanged(int)));
-  _scrollBar->setRange(0,slines - _lines);
-  _scrollBar->setSingleStep(1);
-  _scrollBar->setPageStep(_lines);
-  _scrollBar->setValue(cursor);
-  connect(_scrollBar, SIGNAL(valueChanged(int)), this, SLOT(scrollBarPositionChanged(int)));
+  // Update vertical scroll bar
+  if (!verticalScrollUnchanged)
+  {
+  	disconnect(_scrollBar, SIGNAL(valueChanged(int)), this, SLOT(scrollBarPositionChanged(int)));
+  	_scrollBar->setRange(0,lines - _lines);
+  	_scrollBar->setSingleStep(1);
+  	_scrollBar->setPageStep(_lines);
+  	_scrollBar->setValue(verticalCursor);
+  	connect(_scrollBar, SIGNAL(valueChanged(int)), this, SLOT(scrollBarPositionChanged(int)));
+  }
+	
+  // Update horizontal scroll bar
+  if (!horizontalScrollUnchanged)
+  {
+  	_horizontalScrollBar->setRange(0,columns - _columns);
+  	_horizontalScrollBar->setSingleStep(1);
+  	_horizontalScrollBar->setPageStep(_columns);
+  	_horizontalScrollBar->setValue(horizontalCursor);
+  }
 }
 
 void TerminalDisplay::setScrollBarPosition(ScrollBarPosition position)
@@ -2553,8 +2587,10 @@ void TerminalDisplay::clearImage()
 
 void TerminalDisplay::calcGeometry()
 {
-  _scrollBar->resize(QApplication::style()->pixelMetric(QStyle::PM_ScrollBarExtent),
-                    contentsRect().height());
+  int scrollBarExtent = QApplication::style()->pixelMetric(QStyle::PM_ScrollBarExtent);
+  _scrollBar->resize(scrollBarExtent,contentsRect().height()-scrollBarExtent);
+  _horizontalScrollBar->resize(contentsRect().width()-scrollBarExtent,scrollBarExtent);
+
   switch(_scrollbarLocation)
   {
     case NoScrollBar :
@@ -2574,7 +2610,10 @@ void TerminalDisplay::calcGeometry()
   }
 
   _topMargin = DEFAULT_TOP_MARGIN;
-  _contentHeight = contentsRect().height() - 2 * DEFAULT_TOP_MARGIN + /* mysterious */ 1;
+  _contentHeight = contentsRect().height() - 2 * DEFAULT_TOP_MARGIN + /* mysterious */ 1 - 
+  				   _horizontalScrollBar->height();
+  _horizontalScrollBar->move(contentsRect().bottomLeft() - 
+  							 QPoint(0,_horizontalScrollBar->height()-1));
 
   if (!_isFixedSize)
   {

@@ -144,6 +144,8 @@ public:
 	void setWindowLines(int lines);
     /** Returns the number of lines in the window */
     int windowLines() const;
+	/** Sets the number of columns in the window */
+	void setWindowColumns(int columns);
     /** Returns the number of columns in the window */
     int windowColumns() const;
     
@@ -154,6 +156,8 @@ public:
 
     /** Returns the index of the line which is currently at the top of this window */
     int currentLine() const;
+	/** Returns the index of the column which is currently at the left edge of this window */
+	int currentColumn() const;
 
     /** 
      * Returns the position of the cursor 
@@ -244,7 +248,9 @@ private:
 	bool _bufferNeedsUpdate;
 
 	int  _windowLines;
+	int  _windowColumns;
     int  _currentLine; // see scrollTo() , currentLine()
+	int  _currentColumn; // see scrollTo() , currentColumn()
     bool _trackOutput; // see setTrackOutput() , trackOutput() 
     int  _scrollCount; // count of lines which the window has been scrolled by since
                        // the last call to resetScrollCount()
