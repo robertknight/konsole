@@ -97,17 +97,31 @@ public:
     { 
         /** Do not show the scroll bar. */
         NoScrollBar=0, 
-        /** Show the scroll bar on the left side of the display. */
+        /** 
+		 * Show the scroll bar on the left side of the display.  
+		 * Only valid for the vertical scroll bar.
+		 */
         ScrollBarLeft=1, 
-        /** Show the scroll bar on the right side of the display. */
-        ScrollBarRight=2 
+        /** 
+		 * Show the scroll bar on the right side of the display.  
+		 * Only valid for the vertical scroll bar.
+		 */
+        ScrollBarRight=2,
+		/** 
+		 * Show the scroll bar on the bottom edge of the display. 
+		 * Only valid for the horizontal scroll bar.
+		 */
+		ScrollBarBottom=3
     };
     /** 
-     * Specifies whether the terminal display has a vertical scroll bar, and if so whether it
-     * is shown on the left or right side of the display.
+     * Specifies whether a scrollbar is visible and what position to place it in relative to
+	 * the contents of the display.
+	 *
+	 * @param scrollBar Scrollbar to show/hide or reposition. 
+	 * @param position The new position of the scroll bar
      */
-    void setScrollBarPosition(ScrollBarPosition position);
-
+    void setScrollBarPosition(Qt::Orientation scrollBar , ScrollBarPosition position);
+	
     /** 
      * Sets the current position and range of the display's scroll bar.
      *
@@ -709,7 +723,9 @@ private:
     QScrollBar* _scrollBar;
 	QScrollBar* _horizontalScrollBar;
 
-    ScrollBarPosition _scrollbarLocation;
+    ScrollBarPosition _verticalScrollBarPos;
+	ScrollBarPosition _horizontalScrollBarPos;
+
     QString     _wordCharacters;
     int         _bellMode;
 

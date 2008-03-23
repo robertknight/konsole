@@ -594,6 +594,10 @@ void SessionController::setupActions()
 void SessionController::setWrapEnabled(bool enabled)
 {
 	_session->setWrapEnabled(enabled);
+
+	TerminalDisplay::ScrollBarPosition position = enabled ? TerminalDisplay::NoScrollBar :
+															TerminalDisplay::ScrollBarBottom;
+	_view->setScrollBarPosition(Qt::Horizontal,position);
 }
 void SessionController::changeProfile(Profile::Ptr profile)
 {

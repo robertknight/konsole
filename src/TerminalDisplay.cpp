@@ -279,7 +279,8 @@ TerminalDisplay::TerminalDisplay(QWidget *parent)
 ,_lineSelectionMode(false)
 ,_preserveLineBreaks(false)
 ,_columnSelectionMode(false)
-,_scrollbarLocation(NoScrollBar)
+,_verticalScrollBarPos(NoScrollBar)
+,_horizontalScrollBarPos(NoScrollBar)
 ,_wordCharacters(":@-./_~")
 ,_bellMode(SystemBeepBell)
 ,_blinking(false)
@@ -565,8 +566,16 @@ void TerminalDisplay::drawBackground(QPainter& painter, const QRect& rect, const
         QRect verticalScrollBarArea = _scrollBar->isVisible() ? 
                                     rect.intersected(_scrollBar->geometry()) :
                                     QRect();
+
+		// pretend that the horizontal scrollbar covers the entire width of the screen
+		// this ensures that the gab in the corner where the horizontal and vertical scrollbars 
+		// meet is painted with the same background color as the scrollbars themselves
+		QRect hScrollBarGeometry = QRect(contentsRect().bottomLeft() - 
+										QPoint(0,_horizontalScrollBar->height()-1),
+										QSize(width(),_horizontalScrollBar->height()));
+
 		QRect horizontalScrollBarArea = _horizontalScrollBar->isVisible() ? 
-									rect.intersected(_horizontalScrollBar->geometry()) : QRect();
+									rect.intersected(hScrollBarGeometry) : QRect();
 
         QRegion contentsRegion = QRegion(rect)
 								.subtracted(verticalScrollBarArea)
@@ -1582,19 +1591,22 @@ void TerminalDisplay::setScroll(int verticalCursor, int lines,
   }
 }
 
-void TerminalDisplay::setScrollBarPosition(ScrollBarPosition position)
+void TerminalDisplay::setScrollBarPosition(Qt::Orientation orientation , ScrollBarPosition position)
 {
-  if (_scrollbarLocation == position) 
-      return; 
- 
+  bool vertical = orientation == Qt::Vertical;
+  QScrollBar* scrollBar = vertical ? _scrollBar : _horizontalScrollBar;
+
+  ScrollBarPosition& currentPos = vertical ? _verticalScrollBarPos : _horizontalScrollBarPos;
+
   if ( position == NoScrollBar )
-     _scrollBar->hide();
+     scrollBar->hide();
   else 
-     _scrollBar->show(); 
+     scrollBar->show(); 
 
   _topMargin = _leftMargin = 1;
-  _scrollbarLocation = position;
-  
+
+  currentPos = position;
+
   propagateSize();
   update();
 }
@@ -2591,10 +2603,13 @@ void TerminalDisplay::clearImage()
 void TerminalDisplay::calcGeometry()
 {
   int scrollBarExtent = QApplication::style()->pixelMetric(QStyle::PM_ScrollBarExtent);
-  _scrollBar->resize(scrollBarExtent,contentsRect().height()-scrollBarExtent);
-  _horizontalScrollBar->resize(contentsRect().width()-scrollBarExtent,scrollBarExtent);
+  int verticalScrollBarExtent = _scrollBar->isVisible() ? scrollBarExtent : 0;
+  int horizontalScrollBarExtent = _horizontalScrollBar->isVisible() ? scrollBarExtent : 0;
 
-  switch(_scrollbarLocation)
+  _scrollBar->resize(scrollBarExtent,contentsRect().height()-horizontalScrollBarExtent);
+  _horizontalScrollBar->resize(contentsRect().width()-verticalScrollBarExtent,scrollBarExtent);
+
+  switch(_verticalScrollBarPos)
   {
     case NoScrollBar :
      _leftMargin = DEFAULT_LEFT_MARGIN;
@@ -2602,21 +2617,24 @@ void TerminalDisplay::calcGeometry()
      break;
     case ScrollBarLeft :
      _leftMargin = DEFAULT_LEFT_MARGIN + _scrollBar->width();
-     _contentWidth = contentsRect().width() - 2 * DEFAULT_LEFT_MARGIN - _scrollBar->width();
+     _contentWidth = contentsRect().width() - 2 * DEFAULT_LEFT_MARGIN - verticalScrollBarExtent;
      _scrollBar->move(contentsRect().topLeft());
      break;
     case ScrollBarRight:
      _leftMargin = DEFAULT_LEFT_MARGIN;
-     _contentWidth = contentsRect().width()  - 2 * DEFAULT_LEFT_MARGIN - _scrollBar->width();
-     _scrollBar->move(contentsRect().topRight() - QPoint(_scrollBar->width()-1,0));
+     _contentWidth = contentsRect().width()  - 2 * DEFAULT_LEFT_MARGIN - verticalScrollBarExtent;
+     _scrollBar->move(contentsRect().topRight() - QPoint(verticalScrollBarExtent-1,0));
      break;
+	 default:
+	 break;
   }
 
   _topMargin = DEFAULT_TOP_MARGIN;
+
   _contentHeight = contentsRect().height() - 2 * DEFAULT_TOP_MARGIN + /* mysterious */ 1 - 
-  				   _horizontalScrollBar->height();
+  				   horizontalScrollBarExtent;
   _horizontalScrollBar->move(contentsRect().bottomLeft() - 
-  							 QPoint(0,_horizontalScrollBar->height()-1));
+  							 QPoint(0,horizontalScrollBarExtent-1));
 
   if (!_isFixedSize)
   {

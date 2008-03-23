@@ -648,7 +648,8 @@ TerminalDisplay* ViewManager::createTerminalDisplay(Session* session)
    display->setTerminalSizeHint(true);
    display->setTripleClickMode(TerminalDisplay::SelectWholeLine);
    display->setTerminalSizeStartup(true);
-   display->setScrollBarPosition(TerminalDisplay::ScrollBarRight);
+   display->setScrollBarPosition(Qt::Vertical,TerminalDisplay::ScrollBarRight);
+   display->setScrollBarPosition(Qt::Horizontal,TerminalDisplay::NoScrollBar);
    display->setRandomSeed(session->sessionId() * 31);
 
    return display;
@@ -711,11 +712,11 @@ void ViewManager::applyProfile(TerminalDisplay* view , const Profile::Ptr info )
     int scrollBarPosition = info->property<int>(Profile::ScrollBarPosition);
 
     if ( scrollBarPosition == Profile::ScrollBarHidden )
-       view->setScrollBarPosition(TerminalDisplay::NoScrollBar);
+       view->setScrollBarPosition(Qt::Vertical,TerminalDisplay::NoScrollBar);
     else if ( scrollBarPosition == Profile::ScrollBarLeft )
-       view->setScrollBarPosition(TerminalDisplay::ScrollBarLeft);
+       view->setScrollBarPosition(Qt::Vertical,TerminalDisplay::ScrollBarLeft);
     else if ( scrollBarPosition == Profile::ScrollBarRight )
-       view->setScrollBarPosition(TerminalDisplay::ScrollBarRight);
+       view->setScrollBarPosition(Qt::Vertical,TerminalDisplay::ScrollBarRight);
 
     // terminal features
     bool blinkingCursor = info->property<bool>(Profile::BlinkingCursorEnabled);
