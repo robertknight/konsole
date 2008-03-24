@@ -217,9 +217,11 @@ public:
 
   /** 
    * Enables or disables line wrapping.  If line wrapping is enabled, 
-   * the emulation will not allow lines to become longer 
+   * the emulation will not allow lines to become longer.
    *
    * By default, line wrapping is enabled.
+   *
+   * Text wrapping is not supported on all screens.  
    */
   virtual void setTextWrapEnabled(bool enable);
   bool textWrapEnabled() const;
