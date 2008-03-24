@@ -1612,6 +1612,9 @@ void Screen::reformat()
 
 		hist->getCells(i,0,lineSize,buffer.data());
 
+		// trimming trailing whitespace is important to prevent creation
+		// of extra lines when reformatting from an unwrapped screen to a 
+		// wrapped screen
 		while (lineSize > 0 && buffer[lineSize-1].character == ' ')
 			lineSize--;
 
@@ -1633,6 +1636,8 @@ void Screen::reformat()
 	for (int i=0;i<getLines();i++)
 	{
 		int lineSize = screenLines[i].count();
+
+		// (see comments about whitespace trimming above)
 		while (lineSize > 0 && screenLines[i][lineSize-1].character == ' ')
 			lineSize--;
 
