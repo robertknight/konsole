@@ -1610,11 +1610,14 @@ void Screen::reformat()
 	for (int i=0;i<histLines;i++)
 	{
 		int lineSize = hist->getLineLen(i);
-		
+
 		if (buffer.size() < lineSize)
 			buffer.resize(lineSize);
 
 		hist->getCells(i,0,lineSize,buffer.data());
+
+		while (lineSize > 0 && buffer[lineSize-1].character == ' ')
+			lineSize--;
 
 		for (int k=0;k<lineSize;k++)
 		{
