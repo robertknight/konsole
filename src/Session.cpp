@@ -530,7 +530,7 @@ void Session::onViewSizeChange(int /*height*/, int /*width*/)
 void Session::setWrapEnabled(bool wrap)
 {
 	_emulation->setTextWrapEnabled(wrap);
-
+	
 	if (wrap)
 	{
 		// update terminal size to reflect current views
@@ -547,6 +547,8 @@ void Session::setWrapEnabled(bool wrap)
 		// allocate memory for the size of the ScreenWindow
 		_emulation->setImageSize(_emulation->imageSize().height(),1024);
 	}
+
+	_emulation->reformat();
 }
 bool Session::wrapEnabled() const
 {

@@ -1593,3 +1593,77 @@ void Screen::setWrapEnabled(bool enable)
 }
 bool Screen::wrapEnabled() const { return !disableWrap; }
 
+void Screen::reformat()
+{
+	Screen* tempScreen = new Screen(getLines(),getColumns());
+	tempScreen->disableWrap = disableWrap;
+	tempScreen->setScroll(getScroll(),false);
+
+	kDebug() << "Disable wrap " << tempScreen->disableWrap <<
+	"mode wrap" << tempScreen->getMode(MODE_Wrap) << "columns" <<
+	tempScreen->getColumns();
+
+	QVector<Character> buffer;
+
+	// copy lines from history to temp Screen
+	int histLines = hist->getLines();
+	for (int i=0;i<histLines;i++)
+	{
+		int lineSize = hist->getLineLen(i);
+		
+		if (buffer.size() < lineSize)
+			buffer.resize(lineSize);
+
+		hist->getCells(i,0,lineSize,buffer.data());
+
+		for (int k=0;k<lineSize;k++)
+		{
+			Character& ch = buffer[k];
+
+			tempScreen->ef_fg = ch.foregroundColor;
+			tempScreen->ef_bg = ch.backgroundColor;
+			tempScreen->ef_re = ch.rendition;
+			tempScreen->ShowCharacter(ch.character);
+		}
+
+		if (!hist->isWrappedLine(i))
+			tempScreen->NextLine();
+	}
+
+	// copy lines from screen to temp Screen
+	for (int i=0;i<getLines();i++)
+	{
+		int lineSize = screenLines[i].count();
+		while (lineSize > 0 && screenLines[i][lineSize-1].character == ' ')
+			lineSize--;
+
+		if (buffer.size() < lineSize)
+			buffer.resize(lineSize);
+
+		for (int j=0;j<lineSize;j++)
+		{
+			Character& ch = screenLines[i][j];
+			tempScreen->ef_fg = ch.foregroundColor;
+			tempScreen->ef_bg = ch.backgroundColor;
+			tempScreen->ef_re = ch.rendition;
+			tempScreen->ShowCharacter(ch.character);
+		}
+
+		if (!(lineProperties[i] & LINE_WRAPPED))
+			tempScreen->NextLine();
+	}
+	
+	// swap history buffers and screen contents
+    HistoryScroll* 	oldHist = hist;
+	ImageLine*		oldScreenLines = screenLines; 
+
+	hist = tempScreen->hist;
+	tempScreen->hist = oldHist;
+	
+	screenLines = tempScreen->screenLines;
+	tempScreen->screenLines = oldScreenLines;
+	
+	delete tempScreen;
+}
+
+

@@ -548,6 +548,13 @@ public:
 	bool wrapEnabled() const;
 
 	/** 
+	 * Reformats lines of text on the screen.  This should be called
+	 * after setWrapEnabled() is called and after the screen size has been
+	 * updated.
+	 */
+	void reformat();
+	
+	/** 
  	 * Fills the buffer @p dest with @p count instances of the default (ie. blank)
  	 * Character style.
  	 */

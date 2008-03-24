@@ -84,13 +84,17 @@ Emulation::Emulation() :
   connect( this , SIGNAL(programUsesMouseChanged(bool)) , 
            SLOT(usesMouseChanged(bool)) );
 }
-
+void Emulation::reformat()
+{
+	_screen[0]->reformat();
+	_screen[1]->reformat();
+}
 void Emulation::setTextWrapEnabled(bool enable) 
 { 
 	_wrapEnabled = enable;
 
-	_screen[0]->setWrapEnabled(false);
-	_screen[1]->setWrapEnabled(false);
+	_screen[0]->setWrapEnabled(enable);
+	_screen[1]->setWrapEnabled(enable);
 }
 bool Emulation::textWrapEnabled() const { return _wrapEnabled; }
 

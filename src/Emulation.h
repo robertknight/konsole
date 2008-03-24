@@ -224,6 +224,13 @@ public:
   virtual void setTextWrapEnabled(bool enable);
   bool textWrapEnabled() const;
 
+  /** 
+   * Re-does the text layout in the display.  This should be called after
+   * setTextWrapEnabled() is changed and the size of the emulation image 
+   * has been updated.
+   */
+  void reformat();
+
 public slots: 
 
   /** Change the size of the emulation's image */
