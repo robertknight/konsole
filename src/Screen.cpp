@@ -1653,7 +1653,10 @@ void Screen::reformat()
 			tempScreen->ShowCharacter(ch.character);
 		}
 
-		if (!(lineProperties[i] & LINE_WRAPPED))
+		// do not move to a new line if the current line contains the cursor
+		// to avoid triggering a re-print of the current prompt on a new line
+		bool isCursorLine = cuY == i;
+		if (!isCursorLine && !(lineProperties[i] & LINE_WRAPPED))
 			tempScreen->NextLine();
 	}
 	
