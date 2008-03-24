@@ -1599,10 +1599,6 @@ void Screen::reformat()
 	tempScreen->disableWrap = disableWrap;
 	tempScreen->setScroll(getScroll(),false);
 
-	kDebug() << "Disable wrap " << tempScreen->disableWrap <<
-	"mode wrap" << tempScreen->getMode(MODE_Wrap) << "columns" <<
-	tempScreen->getColumns();
-
 	QVector<Character> buffer;
 
 	// copy lines from history to temp Screen
