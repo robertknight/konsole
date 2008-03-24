@@ -1662,7 +1662,9 @@ void Screen::reformat()
 	
 	screenLines = tempScreen->screenLines;
 	tempScreen->screenLines = oldScreenLines;
-	
+
+	lineProperties = tempScreen->lineProperties;
+
 	delete tempScreen;
 }
 
