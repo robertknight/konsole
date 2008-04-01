@@ -530,24 +530,6 @@ void Session::onViewSizeChange(int /*height*/, int /*width*/)
 void Session::setWrapEnabled(bool wrap)
 {
 	_emulation->setTextWrapEnabled(wrap);
-	
-	if (wrap)
-	{
-		// update terminal size to reflect current views
-		updateTerminalSize();
-	}
-	else
-	{
-		// set the window size to a large value which can be considered infinite
-		// for most interactive programs.  
-		//
-		// ISSUE:  This will cause the ScreenWindow class to allocate much larger buffers
-		// than necessary to hold the screen image when copying from the Screen to the 
-		// TerminalDisplay.  The Screen / ScreenWindow classes need to be modified to only
-		// allocate memory for the size of the ScreenWindow
-		_emulation->setImageSize(_emulation->imageSize().height(),1024);
-	}
-
 	_emulation->reformat();
 }
 bool Session::wrapEnabled() const

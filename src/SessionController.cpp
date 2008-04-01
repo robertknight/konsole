@@ -480,7 +480,7 @@ void SessionController::setupActions()
     connect( action , SIGNAL(triggered()) , this , SLOT(renameSession()) );
 
 	// Enable text wrap
-	toggleAction = new KToggleAction(i18n("Enable Word Wrap"),this);
+	toggleAction = new KToggleAction(i18n("Line Wrap"),this);
 	toggleAction->setChecked(true);
 	action = collection->addAction("enable-word-wrap",toggleAction);
 	connect(action,SIGNAL(toggled(bool)),this,SLOT(setWrapEnabled(bool))); 

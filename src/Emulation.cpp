@@ -87,11 +87,13 @@ Emulation::Emulation() :
 void Emulation::reformat()
 {
 	_screen[0]->reformat();
+	_screen[1]->reformat();
 }
 void Emulation::setTextWrapEnabled(bool enable) 
 { 
 	_wrapEnabled = enable;
 	_screen[0]->setWrapEnabled(enable);
+	_screen[1]->setWrapEnabled(enable);
 }
 bool Emulation::textWrapEnabled() const { return _wrapEnabled; }
 
