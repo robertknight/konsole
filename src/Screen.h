@@ -555,6 +555,12 @@ public:
 	void reformat();
 	
 	/** 
+	 * Calculates the smallest number of columns which can contain all
+	 * lines of text in the screen. 
+	 */
+	int maximumLineWidth() const;
+
+	/** 
  	 * Fills the buffer @p dest with @p count instances of the default (ie. blank)
  	 * Character style.
  	 */
@@ -611,6 +617,9 @@ private:
 	void copyFromHistory(Character* dest, int startLine, int lineCount,
 						 int startColumn, int columnCount) const;
 
+	
+	// returns the length of the text in the given buffer minus trailing whitespace
+	static int trimmedLength(const Character* buffer, int size); 
 
     // screen image ----------------
     int lines;
@@ -684,6 +693,13 @@ private:
 
     static Character defaultChar;
 };
+
+inline int Screen::trimmedLength(const Character* buffer, int size)
+{
+	while (size > 0 && buffer[size-1].character == ' ')
+		size--;
+	return size;
+}
 
 }
 

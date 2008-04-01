@@ -1593,9 +1593,38 @@ void Screen::setWrapEnabled(bool enable)
 }
 bool Screen::wrapEnabled() const { return !disableWrap; }
 
+int Screen::maximumLineWidth() const
+{
+	int maxWidth = 0;
+	int lineSize;
+	int histLines = hist->getLines();
+
+	QVector<Character> buffer;
+	for (int i=0;i<histLines;i++)
+	{
+		lineSize = hist->getLineLen(i);
+
+		if (buffer.size() < lineSize)
+			buffer.resize(lineSize);
+
+		hist->getCells(i,0,lineSize,buffer.data());
+		lineSize = trimmedLength(buffer.constData(),lineSize);
+
+		maxWidth = qMax(maxWidth,lineSize);
+	}
+
+	for (int i=0;i<lines;i++)
+	{
+		lineSize = trimmedLength(screenLines[i].constData(),screenLines[i].count());
+		maxWidth = qMax(maxWidth,lineSize);
+	}
+
+	return maxWidth;
+}
+
 void Screen::reformat()
 {
-	Screen* tempScreen = new Screen(getLines(),getColumns());
+	Screen* tempScreen = new Screen(getLines(),disableWrap ? 1 : getColumns());
 	tempScreen->disableWrap = disableWrap;
 	tempScreen->setScroll(getScroll(),false);
 
@@ -1674,7 +1703,7 @@ void Screen::reformat()
 
 	lineProperties = tempScreen->lineProperties;
 
-	// the image size may have increased during reformatting
+	// the image size may have changed during reformatting
 	// (if going from line-wrapped , non-wrapped)
 	columns = tempScreen->columns;
 	lines = tempScreen->lines;

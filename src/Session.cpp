@@ -758,6 +758,13 @@ const HistoryType& Session::historyType() const
 void Session::clearHistory()
 {
     _emulation->clearHistory();
+
+	// reformat if wrapping is disabled to trigger an update
+	// of the Screen's image size
+	if (!_emulation->textWrapEnabled())
+	{
+		_emulation->reformat();
+	}
 }
 
 QStringList Session::arguments() const
