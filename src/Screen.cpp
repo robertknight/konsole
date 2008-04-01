@@ -1661,6 +1661,8 @@ void Screen::reformat()
 	}
 	
 	// swap history buffers and screen contents
+	// (the existing history buffer and screen buffer 
+	// are deleted by the temporary screen's destructor)
     HistoryScroll* 	oldHist = hist;
 	ImageLine*		oldScreenLines = screenLines; 
 
@@ -1671,6 +1673,11 @@ void Screen::reformat()
 	tempScreen->screenLines = oldScreenLines;
 
 	lineProperties = tempScreen->lineProperties;
+
+	// the image size may have increased during reformatting
+	// (if going from line-wrapped , non-wrapped)
+	columns = tempScreen->columns;
+	lines = tempScreen->lines;
 
 	delete tempScreen;
 }
